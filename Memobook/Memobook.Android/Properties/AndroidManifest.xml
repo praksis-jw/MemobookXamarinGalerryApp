@@ -11,6 +11,14 @@
           <data android:scheme="Memobook" android:path="/oauth2redirect" />
         </intent-filter>
       </activity>
+      <activity android:name="microsoft.identity.client.BrowserTabActivity">
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <category android:name="android.intent.category.BROWSABLE" />
+          <data android:scheme="msal553d6879-64f6-4fa5-89ff-0329469df040" android:host="auth" />
+        </intent-filter>
+      </activity>
       <provider android:name="android.support.v4.content.FileProvider"
           android:authorities="${applicationId}.fileprovider"
           android:exported="false"

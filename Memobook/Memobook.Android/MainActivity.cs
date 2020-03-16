@@ -8,6 +8,8 @@ using Android.Widget;
 using Android.OS;
 using Memobook.Models;
 using Android.Content;
+using Microsoft.Identity.Client;
+using Memobook.Data;
 
 namespace Memobook.Droid
 {
@@ -61,7 +63,16 @@ namespace Memobook.Droid
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             global::Xamarin.Auth.Presenters.XamarinAndroid.AuthenticationConfiguration.Init(this, savedInstanceState);
             global::Xamarin.Auth.CustomTabsConfiguration.CustomTabsClosingMessage = null;
+            MicrosoftAuthService.ParentWindow = this;
         }
+
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(requestCode, resultCode, data);
+        }
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);

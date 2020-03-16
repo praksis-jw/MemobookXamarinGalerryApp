@@ -12,6 +12,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using Xamarin.Auth;
+using static Memobook.Views.GeoNamesWebService;
+using Newtonsoft.Json.Linq;
 
 //=c50[MnHBA44/NbWe.Ms6?lo8f2t63kg
 
@@ -29,15 +31,25 @@ namespace Memobook.Views
             }
         private async void QRButton_Clicked(object sender, EventArgs e)
         {
+
             var authenticator = new OAuth2Authenticator(
-            "553d6879-64f6-4fa5-89ff-0329469df040",
-            "=c50[MnHBA44/NbWe.Ms6?lo8f2t63kg",
-            "https://graph.microsoft.com/User.Read",
-            new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/authorize"),
-              new Uri("Memobook://oauth2redirect"),
-            new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/token"),
-            null,
-            true);
+        clientId: "251af922-5cae-4dc9-99c7-052d02158d99",
+        scope: "https://graph.microsoft.com/User.Read",
+        authorizeUrl: new Uri("https://login.microsoftonline.com/common/oauth2/V2.0/authorize"), // the auth URL for the service
+        redirectUrl: new Uri("https://graph.microsoft.com/v1.0/me")); // the redirect URL for the service
+
+         
+
+
+            //var authenticator = new OAuth2Authenticator(
+            //"251af922-5cae-4dc9-99c7-052d02158d99",
+            //"HTMg=MAM=Zc8XW31F@Yqm8wcnzzQATx/",
+            //"https://graph.microsoft.com/User.Read",
+            //new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/authorize"),
+            //  new Uri("https://graph.microsoft.com/v1.0/me"),
+            //new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/token"),
+            //null,
+            //true);
 
 
             authenticator.Completed += OnAuthCompleted;
@@ -78,8 +90,21 @@ namespace Memobook.Views
 
             if (e.IsAuthenticated)
             {
-                await DisplayAlert("Email address", "janek", "OK");
 
+                var httpClient = new System.Net.Http.HttpClient();
+                httpClient = new HttpClient();
+                httpClient.Timeout = new TimeSpan(0, 4, 0);
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", e.Account.Properties.First().Value);
+
+               
+              
+                string requestPath = "https://graph.microsoft.com/v1.0/me";
+
+                var response = RequestHelper.GetRequestAsync(requestPath, httpClient).Result;
+                JObject jObjectResponse = JObject.Parse(response);
+                
+                string userName = jObjectResponse["userPrincipalName"].Value<string>();
+                await DisplayAlert(userName, userName, userName);
             }
         }
     }
