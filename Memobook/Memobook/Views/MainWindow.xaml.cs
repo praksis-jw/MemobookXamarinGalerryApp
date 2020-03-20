@@ -14,6 +14,9 @@ using System.Threading;
 using Xamarin.Auth;
 using static Memobook.Views.GeoNamesWebService;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 //=c50[MnHBA44/NbWe.Ms6?lo8f2t63kg
 
@@ -23,13 +26,98 @@ namespace Memobook.Views
     public partial class MainWindow : ContentPage
     {
         public ImageSource BarcodeImageSource { get; set; }
+        public string userName { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+        BarcodeScanner _myModalPage;
+        ObservableCollection<Event> events2;
+        ObservableCollection<Event> events;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            Debug.WriteLine("Inside SelectedDateViewModel.OnPropertyChanged()");
+
+         
+            var trace =
+            $"PropertyChanged Is Null: {(PropertyChanged == null ? "Yes" : "No")}";
+            Debug.WriteLine(trace);
+
+            var propertyChangedCallback = PropertyChanged;
+            propertyChangedCallback?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+
+        }
+
         public MainWindow()
         {
+            userName = "";
             InitializeComponent();
-             QRButton.Clicked += QRButton_Clicked;
-           
+            ButtonLogin.Clicked += ButtonLogin_Clicked;
+            QR2Button.Clicked += QR2Button_Clicked;
+
+            events = new ObservableCollection<Event>();
+            SupplyLevels.ItemsSource = events;
+
+            events2 = new ObservableCollection<Event>();
+            SupplyLevels2.ItemsSource = events2;
+          
+          
+     
+
+        }
+        private void QR2Button_Clicked(object sender, EventArgs e)
+        {
+            ShowModalPage();
+          //  DisplayAlert("Zeskanowany QR", qrcode, "OK");
+
+        }
+
+
+        private async void ShowModalPage()
+        {
+            // When you want to show the modal page, just call this method
+            // add the event handler for to listen for the modal popping event:
+            Memobook.App.Current.ModalPopping += HandleModalPopping;
+            _myModalPage = new BarcodeScanner();
+            await Navigation.PushModalAsync(_myModalPage);
+        }
+        private string qrcode;
+        public string Qrcode
+        {
+            get
+            {
+                return qrcode;
             }
-        private async void QRButton_Clicked(object sender, EventArgs e)
+
+            set
+            {
+                if (qrcode != value)
+                {
+                    qrcode = value;
+                    OnPropertyChanged("Qrcode");
+                }
+            }
+        }
+
+
+        private void HandleModalPopping(object sender, ModalPoppingEventArgs e)
+        {
+            if (e.Modal == _myModalPage)
+            {
+                // now we can retrieve that phone number:
+                Qrcode = _myModalPage.qrcode;
+                _myModalPage = null;
+                events2.Add(new Event() { Name = "Nowe dodane wydarzenie o nazwie...", EventId = "szczegóły wydarzenia" });
+                // remember to remove the event handler:
+                //  Memobook.App.Current.ModalPopping -= HandleModalPopping;
+                // DisplayAlert("Zeskanowany QR", phoneNumber, "OK");
+
+            }
+        }
+
+
+
+
+        private void ButtonLogin_Clicked(object sender, EventArgs e)
         {
 
             var authenticator = new OAuth2Authenticator(
@@ -38,23 +126,12 @@ namespace Memobook.Views
         authorizeUrl: new Uri("https://login.microsoftonline.com/common/oauth2/V2.0/authorize"), // the auth URL for the service
         redirectUrl: new Uri("https://graph.microsoft.com/v1.0/me")); // the redirect URL for the service
 
-         
 
-
-            //var authenticator = new OAuth2Authenticator(
-            //"251af922-5cae-4dc9-99c7-052d02158d99",
-            //"HTMg=MAM=Zc8XW31F@Yqm8wcnzzQATx/",
-            //"https://graph.microsoft.com/User.Read",
-            //new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/authorize"),
-            //  new Uri("https://graph.microsoft.com/v1.0/me"),
-            //new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/token"),
-            //null,
-            //true);
 
 
             authenticator.Completed += OnAuthCompleted;
             authenticator.Error += OnAuthError;
-          
+
             // AuthenticationState.Authenticator = authenticator;
 
             var presenter = new Xamarin.Auth.Presenters.OAuthLoginPresenter();
@@ -72,6 +149,17 @@ namespace Memobook.Views
             //barcode.Source= ImageSource.FromStream(() => { return stream; });
 
         }
+
+        public async void lvItemTapped(object sender, ItemTappedEventArgs e) { 
+            
+            var myListView = (ListView)sender; 
+            
+            var myItem = myListView.SelectedItem;
+
+
+            await Navigation.PushModalAsync(new QrCodeShow());
+        }
+
 
         private void OnAuthError(object sender, AuthenticatorErrorEventArgs e)
         {
@@ -103,8 +191,36 @@ namespace Memobook.Views
                 var response = RequestHelper.GetRequestAsync(requestPath, httpClient).Result;
                 JObject jObjectResponse = JObject.Parse(response);
                 
-                string userName = jObjectResponse["userPrincipalName"].Value<string>();
-                await DisplayAlert(userName, userName, userName);
+                userName = jObjectResponse["userPrincipalName"].Value<string>();
+
+
+                using (var client1 = new HttpClient())
+                {
+                    string requestPath1 = "https://pph-ws.azurewebsites.net/Email/" + userName;
+
+                    var response1 = RequestHelper.GetRequestAsync(requestPath1, client1).Result;
+                    JObject jObjectResponse1 = JObject.Parse(response);
+
+
+                    if (response1 == "1")
+                    {
+                        ButtonLogin.IsVisible = false;
+                        ButtonLogout.IsVisible = true;
+                        jw2.IsVisible = true;
+                        jw2.Text = "Zalogowano jako " + userName;
+                        jw2.IsVisible = true;
+                        events.Add(new Event() { Name = "Twoje wydarzenie nr 1", EventId = "szczegóły wydarzenia" });
+                        await DisplayAlert("Komunikat", "Logowanie poprawne", "OK");
+                    
+                    }
+                    else
+                        await DisplayAlert("Komunikat", "Twojego Emaila nie ma w naszej bazie lub wpisałeś błędne hasło spróbuje ponownie", "OK");
+                }
+                //GeoNamesWebService geoService = new GeoNamesWebService();
+                //var x = await geoService.GetPlacesAsync(userName);
+                //var x1 = 1;
+
+
             }
         }
     }
@@ -148,27 +264,37 @@ namespace Memobook.Views
         }
 
 
-     
-
-        //public async Task<object> GetPlacesAsync()
-        //{
-        //    //var client = new System.Net.Http.HttpClient();
-        //    //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/api/");
-
-        //    //var response = await client.GetAsync("Glossary");
-        //    //return 1;
 
 
+        public async Task<object> GetPlacesAsync(string userName)
+        {
+
+            using (var client = new HttpClient())
+            {
+               
+                client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Email/");
+
+                var response = await client.GetAsync(userName);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var str = await response.Content.ReadAsStringAsync();
+                    var temp = JsonConvert.DeserializeObject(str);
+                }
+
+                return 1;
+
+            }
 
 
-        //    string urlParams = "{ \"html\": \"html\", \"width \": \"2\", \"height  \": \"2\", \"ratio  \": \"2\" }";
-        //    var r = RequestHelper.PostRequestStringAsync("https://pph-ws.azurewebsites.net/Glossary/test12", urlParams, "application/json", new System.Net.Http.HttpClient()).Result;
+            //string urlParams = "{ \"html\": \"html\", \"width \": \"2\", \"height  \": \"2\", \"ratio  \": \"2\" }";
+            //var r = RequestHelper.PostRequestStringAsync("https://pph-ws.azurewebsites.net/Glossary/test12", urlParams, "application/json", new System.Net.Http.HttpClient()).Result;
 
-        //    var s = 1;
+            //var s = 1;
 
-        //    return 1;
+           // return 1;
 
-        //}
+        }
 
         public class ImageParam
         {
