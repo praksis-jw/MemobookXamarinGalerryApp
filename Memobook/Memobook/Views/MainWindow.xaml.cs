@@ -274,6 +274,9 @@ namespace Memobook.Views
                
                 client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Email/");
 
+                client.DefaultRequestHeaders.Authorization
+                         = new AuthenticationHeaderValue("", "basic aaa");
+
                 var response = await client.GetAsync(userName);
 
                 if (response.IsSuccessStatusCode)

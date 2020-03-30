@@ -16,7 +16,7 @@ namespace Memobook.Data
         {
             database = DependencyService.Get<ISQLite>().GetConnection();
             database.CreateTable<Event>();
-            database.CreateTable<User>();
+            database.CreateTable<EventUser>();
         }
         public Event GetEvent()
         {
@@ -50,21 +50,21 @@ namespace Memobook.Data
 
         }
 
-        public int SaveUser(User user)
+        public Guid SaveUser(EventUser eventuser)
         {
             lock (locker)
             {
-                if (user.Id != 0)
+                if (eventuser.EventUserID != Guid.Empty)
                 {
-                    database.Update(user);
-                    return user.Id;
+                    database.Update(eventuser);
+                    return eventuser.EventUserID;
                 }
                 else
                 {
 
-                    database.Insert(user);
+                    database.Insert(eventuser);
                     database.Commit();
-                    return 1;
+                    return eventuser.EventUserID;
                 }
             }
 
