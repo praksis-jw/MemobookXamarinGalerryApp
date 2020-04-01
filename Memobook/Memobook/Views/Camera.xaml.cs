@@ -21,7 +21,7 @@ namespace Memobook.Views
 
         private async void CameraButton_Clicked(object sender, EventArgs e)
         {
-            User aaa = new User();
+            EventUser aaa = new EventUser();
 
             aaa.Name = "Robert";
 

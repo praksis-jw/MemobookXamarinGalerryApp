@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +27,34 @@ namespace Memobook.Views
         {
             qrcode = result.Text;
             //DisplayAlert("Scanned result", result.Text, "OK");
+
+
+            using (var client = new HttpClient())
+            {
+
+                client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
+                //client.BaseAddress = new Uri("https://localhost:44352/Event/AddUserToEvent/");
+
+                client.DefaultRequestHeaders.Authorization
+                         = new AuthenticationHeaderValue("basic", qrcode);
+
+                var response = await client.GetAsync("aa12345");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var str = await response.Content.ReadAsStringAsync();
+                    //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
+
+                    Event dodanyevent = new Event();
+                    dodanyevent.Mine = 0;
+                    dodanyevent.Selected = 1;
+                }
+
+               
+
+            }
+
+
             await Navigation.PopModalAsync();
             //Device.BeginInvokeOnMainThread(async () =>
             //{

@@ -254,9 +254,6 @@ namespace Memobook.Views
                 StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
                 var result = await client.PostAsync("Glossary/test12", content);
-
-
-
                 string resultContent = await result.Content.ReadAsStringAsync();
                 Console.WriteLine(resultContent);
                 return resultContent;

@@ -64,7 +64,7 @@ namespace Memobook.Droid
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             global::Xamarin.Auth.Presenters.XamarinAndroid.AuthenticationConfiguration.Init(this, savedInstanceState);
             global::Xamarin.Auth.CustomTabsConfiguration.CustomTabsClosingMessage = null;
-            MicrosoftAuthService.ParentWindow = this;
+            //MicrosoftAuthService.ParentWindow = this;
         }
 
 
