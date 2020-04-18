@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Memobook.Data;
+using Newtonsoft.Json;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +18,7 @@ namespace Memobook.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class BarcodeScanner : ContentPage
     {
+        public SQLiteConnection conn;
         public string qrcode { get; set; }
         public BarcodeScanner()
         {
@@ -32,8 +35,8 @@ namespace Memobook.Views
             using (var client = new HttpClient())
             {
 
-                client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
-                //client.BaseAddress = new Uri("https://localhost:44352/Event/AddUserToEvent/");
+                //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
+                client.BaseAddress = new Uri("https://localhost:44352/Event/AddUserToEvent/");
 
                 client.DefaultRequestHeaders.Authorization
                          = new AuthenticationHeaderValue("basic", qrcode);
@@ -46,21 +49,14 @@ namespace Memobook.Views
                     //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
 
                     Event dodanyevent = new Event();
-                    dodanyevent.Mine = 0;
-                    dodanyevent.Selected = 1;
+                    var JsonObject = JsonConvert.DeserializeObject(str);
+          
+                    conn = DependencyService.Get<ISQLite>().GetConnection();
+                    conn.CreateTable<Event>();
+                    conn.Insert(dodanyevent);
                 }
-
-               
-
             }
-
-
             await Navigation.PopModalAsync();
-            //Device.BeginInvokeOnMainThread(async () =>
-            //{
-            //    await DisplayAlert("Scanned result", result.Text, "OK");
-            //    await Navigation.PopModalAsync();
-            //});
         }
     }
 }

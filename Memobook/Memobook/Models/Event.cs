@@ -14,5 +14,6 @@ namespace Memobook
         public int Status { get; set; }
         public int Mine { get; set; }
         public int Selected { get; set; }
+        public string SecretPassword { get; set; }
     }
 }

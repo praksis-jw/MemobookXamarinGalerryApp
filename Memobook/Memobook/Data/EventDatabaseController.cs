@@ -1,13 +1,14 @@
-﻿using Memobook.Models;
+﻿using Memobook.Data;
+using Memobook.Models;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xamarin.Forms;
 
-namespace Memobook.Data
+namespace Memobook
 {
-    public class EventDatabaseController
+    public class  
     {
         static object locker = new object();
 
@@ -30,21 +31,21 @@ namespace Memobook.Data
                 }
             }
         }
-        public int SaveEvent(Event eventt)
+        public string SaveEvent(Event eventt)
         {
             lock(locker)
             {
-                if(eventt.EventIdAuto !=0)
+                if(eventt.EventId != "")
                 {
                     database.Update(eventt);
-                    return eventt.EventIdAuto;
+                    return eventt.EventId;
                 }
                 else
                 {
                     
                     database.Insert(eventt);
                     database.Commit();
-                    return 1;
+                    return "";
                 }
             }
 
