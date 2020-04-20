@@ -8,7 +8,7 @@ using Xamarin.Forms;
 
 namespace Memobook
 {
-    public class  
+    public class EventDatabaseController
     {
         static object locker = new object();
 

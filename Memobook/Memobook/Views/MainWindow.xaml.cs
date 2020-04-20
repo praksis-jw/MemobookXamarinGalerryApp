@@ -17,6 +17,8 @@ using Newtonsoft.Json.Linq;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using Memobook.Data;
+using SQLite;
 
 //=c50[MnHBA44/NbWe.Ms6?lo8f2t63kg
 
@@ -31,7 +33,7 @@ namespace Memobook.Views
         BarcodeScanner _myModalPage;
         ObservableCollection<Event> events2;
         ObservableCollection<Event> events;
-
+        public SQLiteConnection conn;
         protected virtual void OnPropertyChanged(string propertyName)
         {
             Debug.WriteLine("Inside SelectedDateViewModel.OnPropertyChanged()");
@@ -199,17 +201,51 @@ namespace Memobook.Views
                     string requestPath1 = "https://pph-ws.azurewebsites.net/Email/" + userName;
 
                     var response1 = RequestHelper.GetRequestAsync(requestPath1, client1).Result;
-                    JObject jObjectResponse1 = JObject.Parse(response);
+                   // JObject jObjectResponse1 = JObject.Parse(response1);
 
 
-                    if (response1 == "1")
+                    if (response1 != "")
                     {
                         ButtonLogin.IsVisible = false;
                         ButtonLogout.IsVisible = true;
                         jw2.IsVisible = true;
                         jw2.Text = "Zalogowano jako " + userName;
                         jw2.IsVisible = true;
+
+                  
+                        Settings s = new Settings();
+                        s.OneDriveID = userName;
+                        s.SecretPassword = response1;
+
+                        conn = DependencyService.Get<ISQLite>().GetConnection();
+                        conn.CreateTable<Settings>();
+                        conn.Insert(s);
+
+
+                        using (var client = new HttpClient())
+                        {
+
+                            //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
+                            client.BaseAddress = new Uri("https://localhost:44352/Event/GetMyEvents/");
+
+                            client.DefaultRequestHeaders.Authorization
+                                     = new AuthenticationHeaderValue("basic", response1);
+
+                            var response12 = await client.GetAsync("aa12345");
+
+                            if (response12.IsSuccessStatusCode)
+                            {
+                                var str = await response12.Content.ReadAsStringAsync();
+                                //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
+
+                               
+                            }
+                        }
+
+
                         events.Add(new Event() { Name = "Twoje wydarzenie nr 1", EventId = "szczegóły wydarzenia" });
+
+
                         await DisplayAlert("Komunikat", "Logowanie poprawne", "OK");
                     
                     }
