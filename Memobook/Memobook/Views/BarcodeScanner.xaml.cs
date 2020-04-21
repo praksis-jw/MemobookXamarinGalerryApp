@@ -49,8 +49,11 @@ namespace Memobook.Views
                     //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
 
                     Event dodanyevent = new Event();
-                    var JsonObject = JsonConvert.DeserializeObject(str);
-          
+                    //var JsonObject = JsonConvert.DeserializeObject(str);
+
+                    List<Event> UserList = JsonConvert.DeserializeObject<List<Event>>(str);
+
+
                     conn = DependencyService.Get<ISQLite>().GetConnection();
                     conn.CreateTable<Event>();
                     conn.Insert(dodanyevent);
