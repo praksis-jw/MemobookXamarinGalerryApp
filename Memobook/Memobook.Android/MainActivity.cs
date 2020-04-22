@@ -10,6 +10,7 @@ using Memobook.Models;
 using Android.Content;
 using Microsoft.Identity.Client;
 using Memobook.Data;
+using System.Net;
 
 namespace Memobook.Droid
 {
@@ -24,6 +25,7 @@ namespace Memobook.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+            ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
             ZXing.Net.Mobile.Forms.Android.Platform.Init();
             global::Android.Net.Uri uri_android = Intent.Data;
 
@@ -50,7 +52,7 @@ namespace Memobook.Droid
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
-           
+
 
 
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -60,6 +62,7 @@ namespace Memobook.Droid
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            System.Net.ServicePointManager.ServerCertificateValidationCallback = (_, __, ___, ____) => true;
             LoadApplication(new App());
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             global::Xamarin.Auth.Presenters.XamarinAndroid.AuthenticationConfiguration.Init(this, savedInstanceState);
@@ -72,6 +75,7 @@ namespace Memobook.Droid
         {
             base.OnActivityResult(requestCode, resultCode, data);
             AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(requestCode, resultCode, data);
+           
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -80,6 +84,7 @@ namespace Memobook.Droid
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             global::ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+           
         }
     }
      

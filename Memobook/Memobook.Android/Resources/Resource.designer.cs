@@ -26,6 +26,7 @@ namespace Memobook.Droid
 		
 		public static void UpdateIdValues()
 		{
+			global::ModernHttpClient.Resource.String.library_name = global::Memobook.Droid.Resource.String.library_name;
 			global::Xamarin.Auth.Resource.Animation.slide_in_right = global::Memobook.Droid.Resource.Animation.slide_in_right;
 			global::Xamarin.Auth.Resource.Animation.slide_out_left = global::Memobook.Droid.Resource.Animation.slide_out_left;
 			global::Xamarin.Auth.Resource.Attribute.alpha = global::Memobook.Droid.Resource.Attribute.alpha;

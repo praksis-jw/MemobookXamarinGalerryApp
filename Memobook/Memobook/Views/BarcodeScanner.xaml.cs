@@ -1,4 +1,6 @@
 ﻿using Memobook.Data;
+using Memobook.Interfaces;
+using ModernHttpClient;
 using Newtonsoft.Json;
 using SQLite;
 using System;
@@ -32,11 +34,11 @@ namespace Memobook.Views
             //DisplayAlert("Scanned result", result.Text, "OK");
 
 
-            using (var client = new HttpClient())
+            using (var client = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
             {
 
-                //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
-                client.BaseAddress = new Uri("https://localhost:44352/Event/AddUserToEvent/");
+               // client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
+                 client.BaseAddress = new Uri("https://192.168.100.107:44383/Event/AddUserToEvent/");
 
                 client.DefaultRequestHeaders.Authorization
                          = new AuthenticationHeaderValue("basic", qrcode);

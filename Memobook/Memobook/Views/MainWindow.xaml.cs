@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Memobook.Data;
 using SQLite;
+using System.Net;
 
 //=c50[MnHBA44/NbWe.Ms6?lo8f2t63kg
 
@@ -226,12 +227,13 @@ namespace Memobook.Views
                         {
 
                             //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
-                            client.BaseAddress = new Uri("https://localhost:44352/Event/GetMyEvents/");
+                            client.BaseAddress = new Uri("https://192.68.100.107:44352/Email/");
 
                             client.DefaultRequestHeaders.Authorization
                                      = new AuthenticationHeaderValue("basic", response1);
-
-                            var response12 = await client.GetAsync("aa12345");
+                            ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
+                        
+                        var response12 = await client.GetAsync("aa12345");
 
                             if (response12.IsSuccessStatusCode)
                             {

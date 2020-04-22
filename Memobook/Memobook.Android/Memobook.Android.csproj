@@ -53,6 +53,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="modernhttpclient">
+      <Version>2.4.2</Version>
+    </PackageReference>
     <PackageReference Include="sqlite-net-pcl">
       <Version>1.6.292</Version>
     </PackageReference>
@@ -67,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code\BarcodeService.cs" />
+    <Compile Include="Code\HttpService.cs" />
     <Compile Include="Data\SQLite_Android.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
