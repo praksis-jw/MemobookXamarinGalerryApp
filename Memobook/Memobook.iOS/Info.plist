@@ -36,5 +36,11 @@
 	<string>Assets.xcassets/AppIcon.appiconset</string>
   <key>NSCameraUsageDescription</key>
   <string>This app needs access to the camera to take photos.</string>
+  <key>UIAppFonts</key>
+  <array>
+    <string>FontAwesome5BrandsRegular.otf</string>
+    <string>FontAwesome5Regular.otf</string>
+    <string>FontAwesome5Solid.otf</string>
+  </array>
 </dict>
 </plist>

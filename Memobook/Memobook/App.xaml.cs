@@ -15,7 +15,7 @@ namespace Memobook
         public App()
         {
             InitializeComponent();
-
+            Plugin.Iconize.Iconize.With(new Plugin.Iconize.Fonts.FontAwesomeRegularModule());
             DependencyService.Register<MockDataStore>();
             MainPage = new MainPage();
         }

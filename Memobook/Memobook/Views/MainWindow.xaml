@@ -28,33 +28,46 @@
 
 
 
-                <ListView x:Name="SupplyLevels" ItemsSource="{Binding Items}" Grid.Row="2"  Grid.ColumnSpan="3"
+                <ListView x:Name="SupplyLevels" ItemsSource="{Binding events}" Grid.Row="2"  Grid.ColumnSpan="4"
               CachingStrategy="RecycleElement" ItemTapped="lvItemTapped"
               RowHeight="60">
 
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <ViewCell>
-                                <StackLayout Margin="8">
 
-                                    <Label Text="{Binding Name}"
-                               FontAttributes="Bold" />
-                                   
-                                    <Label Text="{Binding EventId}" />
-                                    <Button Text="Zaloguj się"></Button>
-                                </StackLayout>
+                                <Grid Margin="10,0,0,0">
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2.5*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackLayout Grid.Column="0" >
+
+                                        <Label Margin="0,10,0,0" Text="{Binding Name}"   LineBreakMode="NoWrap"
+                               FontAttributes="Bold" FontSize="12"  />
+                                        <Label Text="{Binding EventId}"  FontSize="Micro"   />
+
+                                    </StackLayout>
+                                    <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="0">
+                                        <Button  Clicked="Button_Clicked" Text="&#xf083;"  FontFamily="{StaticResource FontAwesomeSolid}"  WidthRequest="55"></Button>
+                                        <Button Clicked="Button_Clicked_2"  Text="&#xf129;"  FontFamily="{StaticResource FontAwesomeSolid}"   WidthRequest="55"></Button>
+                                        <Button  WidthRequest="55" Text="&#xf2ed;"  FontFamily="{StaticResource FontAwesomeSolid}" ></Button>
+                                    </StackLayout>
+                                </Grid>
                             </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>
 
+
                 </ListView>
                 <Label x:Name="jw23" Text="Twoje wydarzenia:"  Grid.Row="1" Margin="10,0,0,0" 
                                FontAttributes="Bold" />
-                <Label x:Name="jw2" Text="Zalogowano jako" Grid.Row="0" Margin="10,0,0,0" IsVisible="False"
+                <Label x:Name="jw2" Text="Zalogowano jako" Grid.Row="0" Margin="10,10,0,0" IsVisible="False"
                                FontAttributes="Bold" />
             
                 <Button x:Name="ButtonLogin" Grid.Row="0" Padding="0" Margin="10,5,0,0" Text="Zaloguj się" FontSize="Micro" Grid.Column="0"  WidthRequest="120" HeightRequest="40" HorizontalOptions="Start"/>
-                <Button x:Name="ButtonLogout"  FontSize="Micro" Grid.Row="0" Text="Wyloguj" IsVisible="False" WidthRequest="120" HeightRequest="40" HorizontalOptions="End"  Grid.Column="2"/>
+                <Button x:Name="ButtonLogout"   Text="&#xf14d;"  FontFamily="{StaticResource FontAwesomeSolid}"   Grid.Row="0"  IsVisible="False" WidthRequest="120" HeightRequest="60" HorizontalOptions="End"  Grid.Column="2"/>
                 <!--<Image Grid.ColumnSpan="2" x:Name="barcode" HorizontalOptions="Center"/>-->
                 <Button x:Name="DodajWydarzenie" IsVisible="False" Grid.Row="2" Text="(+) Dodaj Wydarzenie"  FontSize="Micro"  WidthRequest="120" HeightRequest="40" HorizontalOptions="End"  Grid.Column="2"/>
             </Grid>
@@ -64,26 +77,43 @@
                     <RowDefinition Height="5*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="7*"/>
+                    <ColumnDefinition Width="6*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Label x:Name="j" Text="Wydarzenia w których jesteś zaproszony:" Grid.Column="0"  Margin="10" IsVisible="True"
                                FontAttributes="Bold" />
-                <Button x:Name="QR2Button" Grid.Row="0" FontSize="Micro" Grid.Column="1" HorizontalOptions="EndAndExpand" WidthRequest="200"   Text="(+) QR" Margin="0,0,5,0"/>
-                <ListView x:Name="SupplyLevels2" ItemsSource="{Binding Items}" Grid.Row="1" Grid.ColumnSpan="2"
+                <Button x:Name="QR2Button" Grid.Row="0" FontSize="Medium" Grid.Column="1" HorizontalOptions="EndAndExpand" WidthRequest="100"   Text="&#xf055;"  FontFamily="{StaticResource FontAwesomeSolid}" Margin="0,0,5,0"/>
+                <Button x:Name="ResetDatabase" IsVisible="False" Grid.Row="0" FontSize="Micro" Grid.Column="0" HorizontalOptions="EndAndExpand" WidthRequest="200"   Text="Reset database" Margin="0,0,5,0"/>
+                <ListView x:Name="SupplyLevels2" ItemsSource="{Binding events2}" Grid.Row="1" Grid.ColumnSpan="2"
               CachingStrategy="RecycleElement"
               RowHeight="60">
 
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <ViewCell>
-                                <StackLayout Margin="8">
 
-                                    <Label Text="{Binding Name}"
-                               FontAttributes="Bold" />
-                                    <Label Text="{Binding EventId}" />
-                                    <Button></Button>
-                                </StackLayout>
+                                <Grid Margin="10,0,0,0">
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2.5*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackLayout Grid.Column="0" >
+
+                                        <Label Margin="0,10,0,0" Text="{Binding Name}"   LineBreakMode="NoWrap"
+                               FontAttributes="Bold" FontSize="12"  />
+                                        <Label Text="{Binding EventId}"  FontSize="Micro"   />
+
+                                    </StackLayout>
+                                    <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="0">
+                                        <Button  Clicked="Button_Clicked" Text="&#xf083;"  FontFamily="{StaticResource FontAwesomeSolid}"  WidthRequest="55"></Button>
+                                        <Button  Text="&#xf129;"  FontFamily="{StaticResource FontAwesomeSolid}"   WidthRequest="55"></Button>
+                                        <Button Clicked="Button_Clicked_1"  WidthRequest="55" Text="&#xf2ed;"  FontFamily="{StaticResource FontAwesomeSolid}" ></Button>
+                                     
+
+                                     
+                                    </StackLayout>
+                                </Grid>
                             </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>

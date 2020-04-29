@@ -4,7 +4,9 @@ using System.Text;
 
 namespace Memobook
 {
-    class User
+    class SomePostRequest
     {
+        public int id { get; set; }
+        public byte[] data { get; set; }
     }
 }

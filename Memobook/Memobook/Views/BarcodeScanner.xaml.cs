@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using SQLite;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -22,46 +23,86 @@ namespace Memobook.Views
     {
         public SQLiteConnection conn;
         public string qrcode { get; set; }
+        public string komunikat { get; set; }
+        public EventUser x123 { get; set; }
         public BarcodeScanner()
         {
+            _isScanning = true;
             InitializeComponent();
      
         }
 
+        private bool _isScanning = true;
+
         public async void Handle_OnScanResult(Result result)
         {
-            qrcode = result.Text;
-            //DisplayAlert("Scanned result", result.Text, "OK");
 
+          
 
-            using (var client = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                if (_isScanning == true)
             {
 
-               // client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
-                 client.BaseAddress = new Uri("https://192.168.100.107:44383/Event/AddUserToEvent/");
+                _isScanning = false;
 
-                client.DefaultRequestHeaders.Authorization
-                         = new AuthenticationHeaderValue("basic", qrcode);
+                //DisplayAlert("Scanned result", result.Text, "OK");
 
-                var response = await client.GetAsync("aa12345");
+                qrcode = result.Text;
 
-                if (response.IsSuccessStatusCode)
+
+                string eventid;
+                string onedriveid;
+
+                Encryption x = new Encryption();
+                x.SecretDecryptor(qrcode, out eventid, out onedriveid);
+
+                conn = DependencyService.Get<ISQLite>().GetConnection(); 
+                List<EventUser> query = conn.Query<EventUser>("Select * From EventUser where UPPER(eventid) = '" + eventid + "'");
+
+                if (query.Count > 0)
                 {
-                    var str = await response.Content.ReadAsStringAsync();
-                    //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
+                    komunikat = "jesteś już członkiem tego wydarzenia";
+                    await Navigation.PopModalAsync();
 
-                    Event dodanyevent = new Event();
-                    //var JsonObject = JsonConvert.DeserializeObject(str);
-
-                    List<Event> UserList = JsonConvert.DeserializeObject<List<Event>>(str);
-
-
-                    conn = DependencyService.Get<ISQLite>().GetConnection();
-                    conn.CreateTable<Event>();
-                    conn.Insert(dodanyevent);
                 }
-            }
-            await Navigation.PopModalAsync();
+                else
+                {
+                    komunikat = "zostałeś dodany do wydarzenia";
+
+
+                    using (var client = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                {
+
+                     //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
+
+                        client.BaseAddress = new Uri("https://192.168.100.108:45457/Event/AddUserToEvent/");
+
+                        client.DefaultRequestHeaders.Authorization
+                                 = new AuthenticationHeaderValue("basic", qrcode);
+
+                        var response = await client.GetAsync("aa12345");
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var str = await response.Content.ReadAsStringAsync();
+                            //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
+
+                            EventUser dodanyevent = new EventUser();
+                            //var JsonObject = JsonConvert.DeserializeObject(str);
+
+                            List<EventUser> UserList = JsonConvert.DeserializeObject<List<EventUser>>(str);
+
+                            conn = DependencyService.Get<ISQLite>().GetConnection();
+                            dodanyevent = UserList[0];
+                            dodanyevent.Mine = false;
+                            //conn.Query<EventUser>("select * from EventUser",null);
+                            conn.CreateTable<EventUser>();
+                            conn.Insert(dodanyevent);
+                            x123 = dodanyevent;
+                            await Navigation.PopModalAsync();
+                        }
+                    }
+                    }
+                }
         }
     }
 }

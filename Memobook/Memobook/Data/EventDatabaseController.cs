@@ -10,73 +10,73 @@ namespace Memobook
 {
     public class EventDatabaseController
     {
-        static object locker = new object();
+        //static object locker = new object();
 
-        SQLiteConnection database;
-        public EventDatabaseController()
-        {
-            database = DependencyService.Get<ISQLite>().GetConnection();
-            database.CreateTable<Event>();
-            database.CreateTable<EventUser>();
-        }
-        public Event GetEvent()
-        {
-            lock(locker)
-            {
-                if(database.Table<Event>().Count() ==0)
-                { return null; }
-                else
-                {
-                    return database.Table<Event>().First();
-                }
-            }
-        }
-        public string SaveEvent(Event eventt)
-        {
-            lock(locker)
-            {
-                if(eventt.EventId != "")
-                {
-                    database.Update(eventt);
-                    return eventt.EventId;
-                }
-                else
-                {
+        //SQLiteConnection database;
+        //public EventDatabaseController()
+        //{
+        //    database = DependencyService.Get<ISQLite>().GetConnection();
+       
+        //    database.CreateTable<EventUser>();
+        //}
+        //public Event GetEvent()
+        //{
+        //    lock(locker)
+        //    {
+        //        if(database.Table<Event>().Count() ==0)
+        //        { return null; }
+        //        else
+        //        {
+        //            return database.Table<Event>().First();
+        //        }
+        //    }
+        //}
+        //public string SaveEvent(Event eventt)
+        //{
+        //    lock(locker)
+        //    {
+        //        if(eventt.EventId != "")
+        //        {
+        //            database.Update(eventt);
+        //            return eventt.EventId;
+        //        }
+        //        else
+        //        {
                     
-                    database.Insert(eventt);
-                    database.Commit();
-                    return "";
-                }
-            }
+        //            database.Insert(eventt);
+        //            database.Commit();
+        //            return "";
+        //        }
+        //    }
 
-        }
+        //}
 
-        public Guid SaveUser(EventUser eventuser)
-        {
-            lock (locker)
-            {
-                if (eventuser.EventUserID != Guid.Empty)
-                {
-                    database.Update(eventuser);
-                    return eventuser.EventUserID;
-                }
-                else
-                {
+        //public Guid SaveUser(EventUser eventuser)
+        //{
+        //    lock (locker)
+        //    {
+        //        if (eventuser.EventUserID != Guid.Empty)
+        //        {
+        //            database.Update(eventuser);
+        //            return eventuser.EventUserID;
+        //        }
+        //        else
+        //        {
 
-                    database.Insert(eventuser);
-                    database.Commit();
-                    return eventuser.EventUserID;
-                }
-            }
+        //            database.Insert(eventuser);
+        //            database.Commit();
+        //            return eventuser.EventUserID;
+        //        }
+        //    }
 
-        }
+        //}
 
-        public int DeleteEvent(int id)
-        {
-            lock (locker)
-            {
-                return database.Delete<Event>(id);
-            }
-        }
+        //public int DeleteEvent(int id)
+        //{
+        //    lock (locker)
+        //    {
+        //        return database.Delete<Event>(id);
+        //    }
+        //}
     }
 }

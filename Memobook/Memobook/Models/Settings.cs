@@ -8,5 +8,7 @@ namespace Memobook
     {
         public string OneDriveID { get; set; }
         public string SecretPassword { get; set; }
+
+        public string Name { get; set; }
     }
 }

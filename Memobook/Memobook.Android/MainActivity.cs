@@ -28,7 +28,7 @@ namespace Memobook.Droid
             ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
             ZXing.Net.Mobile.Forms.Android.Platform.Init();
             global::Android.Net.Uri uri_android = Intent.Data;
-
+            Plugin.Iconize.Iconize.Init(Resource.Id.toolbar, Resource.Id.sliding_tabs);
             Uri uri_netfx = new Uri(uri_android.ToString());
 
             // load redirect_url Page

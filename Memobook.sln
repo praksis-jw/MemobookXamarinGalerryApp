@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memobook.Android", "Memoboo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memobook.iOS", "Memobook\Memobook.iOS\Memobook.iOS.csproj", "{9CD9C44C-6078-4F5C-9D41-63FE978EECF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memobook", "Memobook\Memobook\Memobook.csproj", "{95E3E467-DE95-4663-B39C-60EFF5C07F12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Memobook", "Memobook\Memobook\Memobook.csproj", "{95E3E467-DE95-4663-B39C-60EFF5C07F12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
