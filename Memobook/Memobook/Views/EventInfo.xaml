@@ -18,9 +18,14 @@
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="7*"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="2*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <StackLayout Orientation="Vertical">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackLayout Orientation="Vertical" Grid.RowSpan="2">
                     <Label FontAttributes="Bold" Text="Nazwa wydarzenia:"></Label>
                     <Label Margin="5,0,0,0" x:Name="lNazwaWyd" Text=""></Label>
                     <Label FontAttributes="Bold"  Text="Data Startu:"></Label>
@@ -28,13 +33,7 @@
                     <Label FontAttributes="Bold"  Text="DataKońca:"></Label>
                     <Label Margin="5,0,0,0" x:Name="lDataKonca" Text=""></Label>
                 </StackLayout>
-                <Image Grid.Column="1" x:Name="barcode" HorizontalOptions="Center">
-                    <!--<Image.GestureRecognizers>
-                        <TapGestureRecognizer
-                Tapped="OnImageNameTapped"
-                NumberOfTapsRequired="1" />
-                    </Image.GestureRecognizers>-->
-                </Image>
+                <Button Clicked="Button_Clicked_2" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2"  Text="KOD    QR" ></Button>
 
             </Grid>
 

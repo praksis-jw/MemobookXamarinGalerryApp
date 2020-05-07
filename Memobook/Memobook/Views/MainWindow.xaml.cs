@@ -66,8 +66,8 @@ namespace Memobook.Views
 
         public MainWindow()
         {
-            App.UrlStart = "https://192.168.100.108:45455/";
-           // App.UrlStart = "https://pph-ws.azurewebsites.net/";
+           // App.UrlStart = "https://192.168.100.108:45455/";
+            App.UrlStart = "https://pph-ws.azurewebsites.net/";
             userName = "";
             InitializeComponent();
             ButtonLogin.Clicked += ButtonLogin_Clicked;

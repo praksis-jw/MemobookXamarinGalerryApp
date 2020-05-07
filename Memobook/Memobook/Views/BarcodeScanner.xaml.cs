@@ -58,6 +58,7 @@ namespace Memobook.Views
                 conn = DependencyService.Get<ISQLite>().GetConnection(); 
                 List<EventUser> query = conn.Query<EventUser>("Select * From EventUser where UPPER(eventid) = '" + eventid + "'");
 
+
                 if (query.Count > 0)
                 {
                     komunikat = "jesteś już członkiem tego wydarzenia";

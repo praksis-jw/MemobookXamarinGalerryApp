@@ -32,19 +32,14 @@ namespace Memobook
             // ImageSource.FromStream(() => new MemoryStream(imageAsBytes));
         }
 
-        async Task OnImageNameTapped(object sender, EventArgs args)
+        private async void Button_Clicked_2(object sender, EventArgs e)
         {
-            try
-            {
-                await Navigation.PushModalAsync(new QrCodeShow(qrcode));
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            await Navigation.PushModalAsync(new QrCodeShow(qrcode));
         }
 
-        protected override void OnAppearing()
+    
+
+    protected override void OnAppearing()
         {
             base.OnAppearing();
    
@@ -58,8 +53,7 @@ namespace Memobook
             lDataKonca.Text = a.EndDate;
             qrcode = a.qrcode;
 
-            var stream = DependencyService.Get<IBarcodeService>().ConvertImageStream(a.qrcode);
-            barcode.Source = ImageSource.FromStream(() => { return stream; });
+            
 
 
             List<EventPhoto> query = conn.Query<EventPhoto>("Select * From EventPhoto where EventId = '" + EventId + "'"
