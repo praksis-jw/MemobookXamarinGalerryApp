@@ -20,6 +20,7 @@ namespace Memobook
         public string EventUserID { get; set; }
         public string UserName { get; set; }
         public int StatusID { get; set; }
+        public string qrcode { get; set; }
     }
 }
   

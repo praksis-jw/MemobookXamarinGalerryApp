@@ -7,7 +7,27 @@ namespace Memobook
     class Encryption
     {
 
-        public void SecretDecryptor(string secretpassword, out string EventId, out string onedriveID)
+        public void SecretEncryptor(string EventId, string onedriveID, out string encrypted)
+        {
+            string encrypt = EventId + onedriveID;
+            string ecrypted = "";
+
+            for (int k = 0; k < encrypt.Length; k++)
+            {
+                if (k % 2 == 0)
+                {
+                    ecrypted += Convert.ToChar((int)encrypt[k] + 2);
+                }
+                if (k % 2 == 1)
+                {
+                    ecrypted += Convert.ToChar((int)encrypt[k] + 1);
+                }
+            }
+            encrypted = Reverse(ecrypted);
+        }
+
+
+    public void SecretDecryptor(string secretpassword, out string EventId, out string onedriveID)
         {
             secretpassword = Reverse(secretpassword);
             string wynik = "";

@@ -4,17 +4,19 @@ using Xamarin.Forms.Xaml;
 using Memobook.Services;
 using Memobook.Views;
 using Memobook.Data;
+using DLToolkit.Forms.Controls;
 
 namespace Memobook
 {
     public partial class App : Application
     {
         static EventDatabaseController eventdatabase;
-
+        public static string UrlStart { get; set; }
 
         public App()
         {
             InitializeComponent();
+            FlowListView.Init();
             Plugin.Iconize.Iconize.With(new Plugin.Iconize.Fonts.FontAwesomeRegularModule());
             DependencyService.Register<MockDataStore>();
             MainPage = new MainPage();

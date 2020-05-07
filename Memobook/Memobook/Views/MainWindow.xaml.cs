@@ -23,8 +23,6 @@ using Plugin.Media;
 using Plugin.Media.Abstractions;
 using System.Globalization;
 using System.Text.RegularExpressions;
-
-using static Memobook.Views.MainWindow.GeoNamesWebService;
 using Newtonsoft.Json.Bson;
 using System.Net.Http.Formatting;
 
@@ -39,6 +37,7 @@ namespace Memobook.Views
         public string userName { get; set; }
 
         public string OneDriveId { get; set; }
+        public string BusinessId { get; set; }
         public string SecretPassword { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
         BarcodeScanner _myModalPage;
@@ -67,7 +66,8 @@ namespace Memobook.Views
 
         public MainWindow()
         {
-
+            App.UrlStart = "https://192.168.100.108:45455/";
+           // App.UrlStart = "https://pph-ws.azurewebsites.net/";
             userName = "";
             InitializeComponent();
             ButtonLogin.Clicked += ButtonLogin_Clicked;
@@ -114,7 +114,7 @@ namespace Memobook.Views
 
         private async void ButtonLogout_Clicked(object sender, EventArgs e)
         {
-            bool answer = await DisplayAlert("Question?", "Czy chcesz się wylogować?", "Tak", "Nie");
+            bool answer = await DisplayAlert("", "Czy chcesz się wylogować?", "Tak", "Nie");
 
             if (answer)
             {
@@ -147,6 +147,7 @@ namespace Memobook.Views
 
             conn = DependencyService.Get<ISQLite>().GetConnection();
             conn.DeleteAll<EventUser>();
+            conn.DeleteAll<EventPhoto>();
             conn.DeleteAll<Settings>();
             events.Clear();
             events2.Clear();
@@ -290,7 +291,7 @@ namespace Memobook.Views
             var myItem = myListView.SelectedItem;
 
 
-            await Navigation.PushModalAsync(new QrCodeShow());
+           // await Navigation.PushModalAsync(new QrCodeShow());
         }
 
 
@@ -322,31 +323,48 @@ namespace Memobook.Views
                 string requestPath = "https://graph.microsoft.com/v1.0/me";
 
                 var response = RequestHelper.GetRequestAsync(requestPath, httpClient).Result;
+
                 JObject jObjectResponse = JObject.Parse(response);
 
                 userName = jObjectResponse["userPrincipalName"].Value<string>();
 
 
-                using (var client1 = new HttpClient())
+                using (var client1 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
                 {
-                    string requestPath1 = "https://pph-ws.azurewebsites.net/Email/" + userName;
 
-                    var response1 = RequestHelper.GetRequestAsync(requestPath1, client1).Result;
+           
+                    client1.DefaultRequestHeaders.Authorization
+                             = new AuthenticationHeaderValue("basic", "lalala");
+                    ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
+
+                    client1.BaseAddress = new Uri(App.UrlStart + "Email/");
+
+
+
+                    var response1 = await client1.GetAsync(userName);
+                    //var response1 = RequestHelper.GetRequestAsync(requestPath1, client1).Result;
                     // JObject jObjectResponse1 = JObject.Parse(response1);
 
-
-                    if (response1 != "")
+                    if (response1.IsSuccessStatusCode)
                     {
+                        var str1234 = await response1.Content.ReadAsStringAsync();
+
+                        string temp = JsonConvert.DeserializeObject(str1234) as string;
                         ButtonLogin.IsVisible = false;
                         ButtonLogout.IsVisible = true;
                         jw2.IsVisible = true;
                         jw2.Text = "Zalogowano jako " + userName;
                         jw2.IsVisible = true;
 
+                        String[] para = temp.Split(' ');
+                        BusinessId = para[0];
+                        str1234 = para[1];
+
+
 
                         Settings s = new Settings();
                         s.OneDriveID = userName;
-                        s.SecretPassword = response1;
+                        s.SecretPassword = para[1];
 
                         conn = DependencyService.Get<ISQLite>().GetConnection();
                         conn.CreateTable<Settings>();
@@ -360,10 +378,10 @@ namespace Memobook.Views
                         {
 
                             //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Email/");
-                            client.BaseAddress = new Uri("https://192.168.100.108:45455/Email/");
+                            client.BaseAddress = new Uri(App.UrlStart + "Email/");
 
                             client.DefaultRequestHeaders.Authorization
-                                     = new AuthenticationHeaderValue("basic", response1);
+                                     = new AuthenticationHeaderValue("basic", str1234);
                             ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
 
                             var response12 = await client.GetAsync("aa12345");
@@ -393,10 +411,19 @@ namespace Memobook.Views
 
                                     //client12.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/GetAllMyEvents/");
 
-                                    client12.BaseAddress = new Uri("https://192.168.100.108:45455/Event/GetAllMyEvents/");
+                                    client12.BaseAddress = new Uri(App.UrlStart + "Event/GetAllMyEvents/");
+
+                                    
+                                    Encryption a = new Encryption();
+                                    a.SecretEncryptor(str1234, BusinessId, out string encrypted);
+
+
+
+
+
 
                                     client12.DefaultRequestHeaders.Authorization
-                                             = new AuthenticationHeaderValue("basic", userName);
+                                             = new AuthenticationHeaderValue("basic", encrypted);
                                     ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
 
 
@@ -416,7 +443,10 @@ namespace Memobook.Views
                                         conn.CreateTable<EventUser>();
                                         foreach (EventUser x in UserList)
                                         {
-
+                                            
+                                            Encryption enc = new Encryption();
+                                            enc.SecretEncryptor(x.EventId, BusinessId, out string wynik);
+                                            x.qrcode = wynik;
                                             //conn.Query<EventUser>("select * from EventUser",null);
 
                                             conn.Insert(x);
@@ -440,6 +470,7 @@ namespace Memobook.Views
                     else
                         await DisplayAlert("Komunikat", "Twojego Emaila nie ma w naszej bazie lub wpisałeś błędne hasło spróbuje ponownie", "OK");
                 }
+            
                 //GeoNamesWebService geoService = new GeoNamesWebService();
                 //var x = await geoService.GetPlacesAsync(userName);
                 //var x1 = 1;
@@ -451,111 +482,81 @@ namespace Memobook.Views
         private async void Button_Clicked(object sender, EventArgs e)
         {
 
-            if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
+            var action = await DisplayActionSheet("Dodaj zdjęcie do wydarzenia", "Anuluj", null, "Wybierz istniejące", "Zrób zdjęcie");
+            MediaFile file = null;
+            if (action == "Zrób zdjęcie")
             {
-                await DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
-                return;
+
+                if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
+                {
+                    await DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
+                    return;
+                }
+                file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+                {
+                    Directory = "Sample",
+                    Name = "test.jpg"
+                });
             }
-            var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+            if (action == "Wybierz istniejące")
             {
-                Directory = "Sample",
-                Name = "test.jpg"
-            });
+
+                if (!CrossMedia.Current.IsPickPhotoSupported)
+                {
+                    await DisplayAlert("Photos Not Supported", "Permission not granted to photos", "OK");
+ 
+                    return;
+                }
+                file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new
+                                  Plugin.Media.Abstractions.PickMediaOptions
+                {
+                    PhotoSize = Plugin.Media.Abstractions.PhotoSize.Full
+                });
+            }
+
             if (file == null)
-                return;
-            //   await DisplayAlert("File Location", file.Path, "OK");
-            byte[] aaaa;
-            Stream aaaaaaaa;
+                    return;
 
-            using (var memoryStream = new MemoryStream())
-            {
-               
-                file.GetStream().CopyTo(memoryStream);
-                file.Dispose();
-                aaaaaaaa = memoryStream;
-                aaaa = memoryStream.ToArray();
-            }
+                //   await DisplayAlert("File Location", file.Path, "OK");
+                byte[] aaaa;
+                Stream aaaaaaaa;
 
+                using (var memoryStream = new MemoryStream())
+                {
 
-            EventUser stringInThisCell = (EventUser)((Button)sender).BindingContext;
-
-            conn = DependencyService.Get<ISQLite>().GetConnection();
-            conn.CreateTable<EventPhoto>();
-            EventPhoto x = new EventPhoto();
-            x.Photo = aaaa;
-            x.DateAdded = DateTime.Now;
-            x.EventUserId = stringInThisCell.EventUserID;
-            x.EventId = stringInThisCell.EventId;
+                    file.GetStream().CopyTo(memoryStream);
+                    file.Dispose();
+                    aaaaaaaa = memoryStream;
+                    aaaa = memoryStream.ToArray();
+                }
 
 
-            var x12356 = await SendRequestAsync_jw(x);
+                EventUser stringInThisCell = (EventUser)((Button)sender).BindingContext;
+
+                conn = DependencyService.Get<ISQLite>().GetConnection();
+                conn.CreateTable<EventPhoto>();
+                EventPhoto x = new EventPhoto();
+                x.PhotoOriginal = aaaa;
+                x.DateAdded = DateTime.Now;
+                x.EventUserId = stringInThisCell.EventUserID;
+                x.EventId = stringInThisCell.EventId;
+
+                conn = DependencyService.Get<ISQLite>().GetConnection();
+                conn.CreateTable<EventUser>();
+                EventUser a = conn.Table<EventUser>().Where(k => k.EventId == stringInThisCell.EventId).ToList()[0];
 
 
+                  var x12356 = await SendRequestAsync_jw(x,a);
 
+                //conn.Query<EventUser>("select * from EventUser",null);
 
+                //conn.Query<EventUser>("select * from EventUser",null);
 
-            //conn.Query<EventUser>("select * from EventUser",null);
-
-
-
-            //conn.Query<EventUser>("select * from EventUser",null);
-
-            conn.Insert(x);
-
-
-           
-
-
-            //image.Source = ImageSource.FromStream(() =>
-            //{
-            //    var stream = file.GetStream();
-            //    file.Dispose();
-            //    return stream;
-            //});
-
-
+                conn.Insert(x);
         }
 
 
-        //async public Task<HttpResponseMessage> UploadImage(string url, byte[] ImageData)
-        //{
-
-
-
-        //    var bytesAsString = Encoding.UTF8.GetString(ImageData);
-        //    //var person = JsonConvert.DeserializeObject<Person>(bytesAsString);
-
-        //    var x = Convert.ToBase64String(ImageData);
-        //    //  StringContent content12 = new StringContent(ImageData, Encoding.UTF8, "application/bson");
-        //    var content = new StringContent(x, Encoding.UTF8, "application/json");
-        //    //content.Add(imageContent);
-
-        //    using (var client12 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
-        //    {
-
-
-        //        //client12.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/GetAllMyEvents/");
-
-        //        client12.BaseAddress = new Uri("https://192.168.100.108:45455/Event/AddPhoto/");
-
-        //        client12.DefaultRequestHeaders.Authorization
-        //                 = new AuthenticationHeaderValue("basic", userName);
-        //        ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
-
-
-        //        var response123 = await client12.PostAsync("sdfsdfsdsdfsdfaasdfsdfasdfsdf", content);
-
-        //        if (response123.IsSuccessStatusCode)
-        //        {
-        //            var str1 = await response123.Content.ReadAsStringAsync();
-        //        }
-        //    }
-
-
-        //    return null;
-        //}
-
-        public async Task<HttpResponseMessage> SendRequestAsync_jw(EventPhoto x12345)
+        public async Task<HttpResponseMessage> SendRequestAsync_jw(EventPhoto x12345, EventUser x)
         {
 
 
@@ -567,9 +568,9 @@ namespace Memobook.Views
                 client12.DefaultRequestHeaders.Accept.Clear();
                 client12.DefaultRequestHeaders.Accept.Add(
                         new MediaTypeWithQualityHeaderValue("application/json"));
-                client12.BaseAddress = new Uri("https://192.168.100.108:45455/Event/AddPhoto/");
+                client12.BaseAddress = new Uri(App.UrlStart + "Event/AddPhoto/");
                 client12.DefaultRequestHeaders.Authorization
-                      = new AuthenticationHeaderValue("basic", "jw");
+                      = new AuthenticationHeaderValue("basic", x.SecretPassword + " " + x.qrcode);
 
                 ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
 
@@ -586,79 +587,8 @@ namespace Memobook.Views
                     conn.CreateTable<EventPhoto>();
                     x12345.EventPhotoId = Convert.ToInt32(resultContent);
                     conn.Update(x12345);
-                    var x234 = "";
                 }
             }
-            return null;
-        }
-
-
-        public async Task<HttpResponseMessage> SendRequestAsync(byte[] xxx)
-        {
-            //using (var stream = new MemoryStream())
-            //using (var bson = new BsonWriter(stream))
-            //{
-            //    var jsonSerializer = new JsonSerializer();
-
-            //    var request = new SomePostRequest
-            //    {
-            //        id = 20,
-            //        data = xxx
-            //    };
-
-
-
-            //    jsonSerializer.Serialize(bson, request);
-
-            //    using (var client12 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
-            //    {
-
-            //        client12.BaseAddress = new Uri("https://192.168.100.108:45457/Event/AddPhoto/");
-            //        client12.DefaultRequestHeaders.Accept.Clear();
-            //        client12.DefaultRequestHeaders.Accept.Add(
-            //                new MediaTypeWithQualityHeaderValue("application/bson"));
-            //        client12.DefaultRequestHeaders.Authorization
-            //        = new AuthenticationHeaderValue("basic", userName);
-            //        ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
-
-            //        var byteArrayContent = new ByteArrayContent(stream.ToArray());
-            //        byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/bson");
-
-            //        MediaTypeFormatter bsonFormatter = new BsonMediaTypeFormatter();
-            //        var result = await client12.PostAsync("aaa", request, bsonFormatter);
-
-            //        result.EnsureSuccessStatusCode();
-            //    }
-            //    }
-            //return null;
-
-
-            //using (var client12 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
-            //{
-               
-
-            //// Set the Accept header for BSON.
-            //client12.DefaultRequestHeaders.Accept.Clear();
-            //client12.DefaultRequestHeaders.Accept.Add(
-            //        new MediaTypeWithQualityHeaderValue("application/bson"));
-            //    client12.BaseAddress = new Uri("https://192.168.100.108:45455/Event/AddPhoto/");
-            //    client12.DefaultRequestHeaders.Authorization
-            //          = new AuthenticationHeaderValue("basic", userName);
-            //          ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
-
-            //    var request = new SomePostRequest
-            //    {
-            //        id = 20,
-            //        data = xxx
-            //  };
-                
-
-            //    // POST using the BSON formatter.
-            //    MediaTypeFormatter bsonFormatter = new BsonMediaTypeFormatter();
-            //    var result = await client12.PostAsync("aaa", request, bsonFormatter);
-
-            //    result.EnsureSuccessStatusCode();
-            //}
             return null;
         }
     
@@ -666,7 +596,7 @@ namespace Memobook.Views
 
         private async void Button_Clicked_1(object sender, EventArgs e)
         {
-            bool answer = await DisplayAlert("Pytanie?", "Czy na pewno chcesz wypisać się z tego wydarzenia?", "Tak", "Nie");
+            bool answer = await DisplayAlert("", "Czy na pewno chcesz wypisać się z tego wydarzenia?", "Tak", "Nie");
 
             if (answer)
             {
@@ -685,85 +615,6 @@ namespace Memobook.Views
             }
 
         }
-
-
-        public class GeoNamesWebService
-        {
-            public GeoNamesWebService()
-            {
-            }
-
-            public async Task<object> LoginAsync()
-            {
-                using (var client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/");
-
-                    string urlParams = "{ \"html\": \"html\", \"width \": \"2\", \"height  \": \"2\", \"ratio  \": \"2\" }";
-
-                    ImageParam x = new ImageParam();
-                    x.height = 1;
-                    x.html = "aaaa";
-                    x.ratio = 2.0;
-                    x.width = 2;
-
-
-
-                    string jsonString;
-                    jsonString = JsonConvert.SerializeObject(x);
-
-                    StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-
-                    var result = await client.PostAsync("Glossary/test12", content);
-                    string resultContent = await result.Content.ReadAsStringAsync();
-                    Console.WriteLine(resultContent);
-                    return resultContent;
-                }
-            }
-
-
-
-
-            public async Task<object> GetPlacesAsync(string userName)
-            {
-
-                using (var client = new HttpClient())
-                {
-
-                    client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Email/");
-
-                    client.DefaultRequestHeaders.Authorization
-                             = new AuthenticationHeaderValue("", "basic aaa");
-
-                    var response = await client.GetAsync(userName);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var str = await response.Content.ReadAsStringAsync();
-                        var temp = JsonConvert.DeserializeObject(str);
-                    }
-
-                    return 1;
-
-                }
-
-
-                //string urlParams = "{ \"html\": \"html\", \"width \": \"2\", \"height  \": \"2\", \"ratio  \": \"2\" }";
-                //var r = RequestHelper.PostRequestStringAsync("https://pph-ws.azurewebsites.net/Glossary/test12", urlParams, "application/json", new System.Net.Http.HttpClient()).Result;
-
-                //var s = 1;
-
-                // return 1;
-
-            }
-
-            public class ImageParam
-            {
-                public string html { get; set; }
-                public int width { get; set; }
-                public int height { get; set; }
-                public double ratio { get; set; }
-            }
 
             static public class RequestHelper
             {
@@ -808,7 +659,7 @@ namespace Memobook.Views
                 }
             }
 
-        }
+        
         public string ChosenEvent { get; set; }
         private async void Button_Clicked_2(object sender, EventArgs e)
         {

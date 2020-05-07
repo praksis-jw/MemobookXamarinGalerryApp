@@ -9,11 +9,10 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Image x:Name="PhotoImage" />
-            <Button x:Name="CameraButton" Text="Wyślij" Grid.Row="1" />
+            <Button x:Name="CameraButton" Text="Wyślij"  />
         </Grid>
     </ContentPage.Content>
 </ContentPage>

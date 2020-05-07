@@ -13,11 +13,11 @@ namespace Memobook.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class QrCodeShow : ContentPage
     {
-        public QrCodeShow()
+        public QrCodeShow( string text)
         {
             InitializeComponent();
 
-            var stream = DependencyService.Get<IBarcodeService>().ConvertImageStream("Janek");
+            var stream = DependencyService.Get<IBarcodeService>().ConvertImageStream(text);
             barcode.Source= ImageSource.FromStream(() => { return stream; });
         }
     }

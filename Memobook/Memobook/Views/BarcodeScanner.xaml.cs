@@ -74,7 +74,7 @@ namespace Memobook.Views
 
                      //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
 
-                        client.BaseAddress = new Uri("https://192.168.100.108:45457/Event/AddUserToEvent/");
+                        client.BaseAddress = new Uri(App.UrlStart + "Event/AddUserToEvent/");
 
                         client.DefaultRequestHeaders.Authorization
                                  = new AuthenticationHeaderValue("basic", qrcode);
@@ -94,6 +94,7 @@ namespace Memobook.Views
                             conn = DependencyService.Get<ISQLite>().GetConnection();
                             dodanyevent = UserList[0];
                             dodanyevent.Mine = false;
+                            dodanyevent.qrcode = qrcode;
                             //conn.Query<EventUser>("select * from EventUser",null);
                             conn.CreateTable<EventUser>();
                             conn.Insert(dodanyevent);
