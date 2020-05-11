@@ -53,9 +53,9 @@ namespace Memobook
             lDataKonca.Text = a.EndDate;
             qrcode = a.qrcode;
 
-            
 
 
+            conn.CreateTable<EventPhoto>();
             List<EventPhoto> query = conn.Query<EventPhoto>("Select * From EventPhoto where EventId = '" + EventId + "'"
                              );
             List<EventPhoto> query2 = conn.Query<EventPhoto>("Select * From EventPhoto"

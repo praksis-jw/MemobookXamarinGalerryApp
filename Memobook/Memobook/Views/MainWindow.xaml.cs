@@ -66,11 +66,12 @@ namespace Memobook.Views
 
         public MainWindow()
         {
-           // App.UrlStart = "https://192.168.100.108:45455/";
+           // App.UrlStart = "localhost/";
             App.UrlStart = "https://pph-ws.azurewebsites.net/";
             userName = "";
             InitializeComponent();
             ButtonLogin.Clicked += ButtonLogin_Clicked;
+            ButtonRefresh.Clicked += ButtonRefresh_Clicked;
             ButtonLogout.Clicked += ButtonLogout_Clicked;
             QR2Button.Clicked += QR2Button_Clicked;
             ResetDatabase.Clicked += ResetDatabase_Clicked;
@@ -97,7 +98,7 @@ namespace Memobook.Views
                 jw2.IsVisible = true;
                 jw2.Text = "Zalogowano jako " + OneDriveId;
                 jw2.IsVisible = true;
-
+                userName = OneDriveId;
 
 
             }
@@ -112,7 +113,148 @@ namespace Memobook.Views
 
         }
 
-        private async void ButtonLogout_Clicked(object sender, EventArgs e)
+        private async void ButtonRefresh_Clicked(object sender, EventArgs e)
+        {
+
+
+            using (var client1 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+            {
+
+
+                client1.DefaultRequestHeaders.Authorization
+                         = new AuthenticationHeaderValue("basic", "lalala");
+                ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
+
+                client1.BaseAddress = new Uri(App.UrlStart + "Email/");
+
+
+
+                var response1 = await client1.GetAsync(userName);
+                //var response1 = RequestHelper.GetRequestAsync(requestPath1, client1).Result;
+                // JObject jObjectResponse1 = JObject.Parse(response1);
+
+                if (response1.IsSuccessStatusCode)
+                {
+                    var str1234 = await response1.Content.ReadAsStringAsync();
+
+                    string temp = JsonConvert.DeserializeObject(str1234) as string;
+                    ButtonLogin.IsVisible = false;
+                    ButtonLogout.IsVisible = true;
+                    jw2.IsVisible = true;
+                    jw2.Text = "Zalogowano jako " + userName;
+                    jw2.IsVisible = true;
+
+                    String[] para = temp.Split(' ');
+                    BusinessId = para[0];
+                    str1234 = para[1];
+
+
+
+                    Settings s = new Settings();
+                    s.OneDriveID = userName;
+                    s.SecretPassword = para[1];
+
+                    conn = DependencyService.Get<ISQLite>().GetConnection();
+                    conn.CreateTable<Settings>();
+                    conn.Insert(s);
+
+
+
+
+
+                    using (var client = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                    {
+
+                        //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Email/");
+                        client.BaseAddress = new Uri(App.UrlStart + "Email/");
+
+                        client.DefaultRequestHeaders.Authorization
+                                 = new AuthenticationHeaderValue("basic", str1234);
+                        ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
+
+                        var response12 = await client.GetAsync("aa12345");
+
+                        if (response12.IsSuccessStatusCode)
+                        {
+                            var str = await response12.Content.ReadAsStringAsync();
+                            //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
+
+
+
+                            List<EventUser> query = conn.Query<EventUser>("Select * From EventUser where Mine = 1"
+                                );
+
+                            foreach (EventUser x in query)
+                            {
+                                conn.Delete(x);
+
+                            }
+                            events.Clear();
+
+                            //pobranie nowych danych do bazy po przelogowaniu
+
+
+                            using (var client12 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                            {
+
+                                //client12.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/GetAllMyEvents/");
+
+                                client12.BaseAddress = new Uri(App.UrlStart + "Event/GetAllMyEvents/");
+
+
+                                Encryption a = new Encryption();
+                                a.SecretEncryptor(str1234, BusinessId, out string encrypted);
+
+
+
+
+
+
+                                client12.DefaultRequestHeaders.Authorization
+                                         = new AuthenticationHeaderValue("basic", encrypted);
+                                ServicePointManager.ServerCertificateValidationCallback += (o, cert, chain, errors) => true;
+
+
+                                var response123 = await client12.GetAsync("aa12345");
+
+                                if (response123.IsSuccessStatusCode)
+                                {
+                                    var str1 = await response123.Content.ReadAsStringAsync();
+                                    //udało się dodac wydarzenie nalezy je teraz wrzucić do bazy wewnętrznej.
+
+                                    EventUser dodanyevent = new EventUser();
+                                    //var JsonObject = JsonConvert.DeserializeObject(str);
+
+                                    List<EventUser> UserList = JsonConvert.DeserializeObject<List<EventUser>>(str1);
+
+                                    conn = DependencyService.Get<ISQLite>().GetConnection();
+                                    conn.CreateTable<EventUser>();
+                                    foreach (EventUser x in UserList)
+                                    {
+
+                                        Encryption enc = new Encryption();
+                                        enc.SecretEncryptor(x.EventId, BusinessId, out string wynik);
+                                        x.qrcode = wynik;
+                                        //conn.Query<EventUser>("select * from EventUser",null);
+
+                                        conn.Insert(x);
+                                        events.Add(x);
+
+
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+                
+
+                
+
+                private async void ButtonLogout_Clicked(object sender, EventArgs e)
         {
             bool answer = await DisplayAlert("", "Czy chcesz się wylogować?", "Tak", "Nie");
 
@@ -144,6 +286,10 @@ namespace Memobook.Views
         private void ResetDatabase_Clicked(object sender, EventArgs e)
         {
 
+
+            conn.CreateTable<Settings>();
+            conn.CreateTable<EventUser>();
+            conn.CreateTable<EventPhoto>();
 
             conn = DependencyService.Get<ISQLite>().GetConnection();
             conn.DeleteAll<EventUser>();
@@ -251,7 +397,9 @@ namespace Memobook.Views
 
 
 
-        private void ButtonLogin_Clicked(object sender, EventArgs e)
+
+
+                private void ButtonLogin_Clicked(object sender, EventArgs e)
         {
 
             var authenticator = new OAuth2Authenticator(
