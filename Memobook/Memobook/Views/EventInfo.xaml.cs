@@ -57,6 +57,7 @@ namespace Memobook
             QrButton.Source = ImageSource.FromStream(() => { return stream; });
             conn.CreateTable<EventPhoto>();
 
+            conn.CreateTable<EventPhoto>();
             List<EventPhoto> query = conn.Query<EventPhoto>("Select * From EventPhoto where EventId = '" + EventId + "'"
                              );
 

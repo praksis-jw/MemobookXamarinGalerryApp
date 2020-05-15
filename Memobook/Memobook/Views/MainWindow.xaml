@@ -51,9 +51,9 @@
 
                                     </StackLayout>
                                     <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="0">
-                                        <Button  Clicked="Button_Clicked" Text="&#xf083;"  FontFamily="{StaticResource FontAwesomeSolid}"  WidthRequest="55"></Button>
-                                        <Button Clicked="Button_Clicked_2"  Text="&#xf129;"  FontFamily="{StaticResource FontAwesomeSolid}"   WidthRequest="55"></Button>
-                                        <Button  WidthRequest="55" Text="&#xf2ed;"  FontFamily="{StaticResource FontAwesomeSolid}" ></Button>
+                                        <Button  Clicked="Button_Clicked" Text="&#xf083;"  FontFamily="{StaticResource FontAwesomeSolid}"  WidthRequest="50"></Button>
+                                        <Button Clicked="Button_Clicked_2"  Text="&#xf129;"  FontFamily="{StaticResource FontAwesomeSolid}"   WidthRequest="50"></Button>
+                                        <Button  WidthRequest="50" Text="&#xf2ed;"  FontFamily="{StaticResource FontAwesomeSolid}" ></Button>
                                     </StackLayout>
                                 </Grid>
                             </ViewCell>
@@ -69,6 +69,7 @@
             
                 <Button x:Name="ButtonLogin" Grid.Row="0" Padding="0" Margin="10,5,0,0" Text="Zaloguj się" FontSize="Micro" Grid.Column="0"  WidthRequest="120" HeightRequest="40" HorizontalOptions="Start"/>
                 <Button x:Name="ButtonLogout"   Text="&#xf14d;"  FontFamily="{StaticResource FontAwesomeSolid}"   Grid.Row="0"  IsVisible="False" WidthRequest="120" HeightRequest="60" HorizontalOptions="End"  Grid.Column="2"/>
+                <Button x:Name="ButtonRefresh"   Text="&#xf021;"  FontFamily="{StaticResource FontAwesomeSolid}"   Grid.Row="0"  IsVisible="true" WidthRequest="120" HeightRequest="60" HorizontalOptions="End"  Grid.Column="3"/>
                 <!--<Image Grid.ColumnSpan="2" x:Name="barcode" HorizontalOptions="Center"/>-->
                 <Button x:Name="DodajWydarzenie" IsVisible="False" Grid.Row="2" Text="(+) Dodaj Wydarzenie"  FontSize="Micro"  WidthRequest="120" HeightRequest="40" HorizontalOptions="End"  Grid.Column="2"/>
                 
@@ -82,7 +83,7 @@
                     <ColumnDefinition Width="6*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Label x:Name="j" Text="Wydarzenia w których jesteś zaproszony:" Grid.Column="0"  Margin="10" IsVisible="True"
+                <Label x:Name="j" Text="Gość w wydarzeniach:" Grid.Column="0"  Margin="10" IsVisible="True"
                                FontAttributes="Bold" />
                 <Button x:Name="QR2Button" Grid.Row="0" FontSize="Medium" Grid.Column="1" HorizontalOptions="EndAndExpand" WidthRequest="100"   Text="&#xf055;"  FontFamily="{StaticResource FontAwesomeSolid}" Margin="0,0,5,0"/>
                 <Button x:Name="ResetDatabase" IsVisible="True" Grid.Row="0" FontSize="Micro" Grid.Column="0" HorizontalOptions="EndAndExpand" WidthRequest="50"   Text="R" Margin="0,0,5,0"/>
@@ -108,12 +109,9 @@
 
                                     </StackLayout>
                                     <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="0">
-                                        <Button  Clicked="Button_Clicked" Text="&#xf083;"  FontFamily="{StaticResource FontAwesomeSolid}"  WidthRequest="55"></Button>
-                                        <Button Clicked="Button_Clicked_2"  Text="&#xf129;"  FontFamily="{StaticResource FontAwesomeSolid}"   WidthRequest="55"></Button>
-                                        <Button Clicked="Button_Clicked_1"  WidthRequest="55" Text="&#xf2ed;"  FontFamily="{StaticResource FontAwesomeSolid}" ></Button>
-                                     
-
-                                     
+                                        <Button  Clicked="Button_Clicked" Text="&#xf083;"  FontFamily="{StaticResource FontAwesomeSolid}"  WidthRequest="50"></Button>
+                                        <Button Clicked="Button_Clicked_2"  Text="&#xf129;"  FontFamily="{StaticResource FontAwesomeSolid}"   WidthRequest="50"></Button>
+                                        <Button Clicked="Button_Clicked_1"  WidthRequest="50" Text="&#xf2ed;"  FontFamily="{StaticResource FontAwesomeSolid}" ></Button>
                                     </StackLayout>
                                 </Grid>
                             </ViewCell>
