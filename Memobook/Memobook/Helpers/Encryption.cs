@@ -49,8 +49,6 @@ namespace Memobook
             string y1 = "";
             x1 = wynik.Substring(0, 36);
             y1 = wynik.Substring(36, wynik.Length - 36);
-            int x = 0;
-            int y = 0;
 
             EventId = x1;
             onedriveID = y1;

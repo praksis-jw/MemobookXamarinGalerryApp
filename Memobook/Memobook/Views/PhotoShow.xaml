@@ -4,11 +4,10 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             Title="Zaproszenie do wydarzenia"
-             x:Class="Memobook.Views.QrCodeShow">
+             x:Class="Memobook.Views.PhotoShow">
     <ContentPage.Content>
         <StackLayout>
-            <Image Grid.ColumnSpan="2" x:Name="barcode" HorizontalOptions="Center"/>
+            <Image Grid.ColumnSpan="2" x:Name="photo" HorizontalOptions="Center"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

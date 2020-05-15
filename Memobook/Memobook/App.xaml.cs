@@ -5,6 +5,8 @@ using Memobook.Services;
 using Memobook.Views;
 using Memobook.Data;
 using DLToolkit.Forms.Controls;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Memobook
 {
@@ -12,7 +14,6 @@ namespace Memobook
     {
         static EventDatabaseController eventdatabase;
         public static string UrlStart { get; set; }
-
         public App()
         {
             InitializeComponent();
@@ -20,11 +21,14 @@ namespace Memobook
             Plugin.Iconize.Iconize.With(new Plugin.Iconize.Fonts.FontAwesomeRegularModule());
             DependencyService.Register<MockDataStore>();
             MainPage = new MainPage();
+           
         }
 
         protected override void OnStart()
         {
+         
         }
+    
 
         protected override void OnSleep()
         {

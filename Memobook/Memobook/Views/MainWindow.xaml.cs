@@ -5,12 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Memobook.Interfaces;
 using System.IO;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
 using Xamarin.Auth;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
@@ -21,10 +19,8 @@ using SQLite;
 using System.Net;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json.Bson;
-using System.Net.Http.Formatting;
+using System.Drawing;
+using Memobook.Interfaces;
 
 //=c50[MnHBA44/NbWe.Ms6?lo8f2t63kg
 
@@ -75,7 +71,7 @@ namespace Memobook.Views
             QR2Button.Clicked += QR2Button_Clicked;
             ResetDatabase.Clicked += ResetDatabase_Clicked;
 
-
+            IsPlaying = true;
 
             conn = DependencyService.Get<ISQLite>().GetConnection();
             conn.CreateTable<Settings>();
@@ -97,9 +93,6 @@ namespace Memobook.Views
                 jw2.IsVisible = true;
                 jw2.Text = "Zalogowano jako " + OneDriveId;
                 jw2.IsVisible = true;
-
-
-
             }
 
             events = new ObservableCollection<EventUser>(conn.Table<EventUser>().Where(k => k.Mine == true).ToList());
@@ -108,6 +101,53 @@ namespace Memobook.Views
 
             events3 = new ObservableCollection<EventUser>(conn.Table<EventUser>().ToList());
             BindingContext = this;
+
+
+            Stopwatch stopWatch = new Stopwatch();
+            // Handle when your app starts
+            // On start runs when your application launches from a closed state, 
+            if (!stopWatch.IsRunning)
+            {
+                stopWatch.Start();
+            }
+
+            Device.StartTimer(new TimeSpan(0, 0, 1), () =>
+            {
+                if (stopWatch.IsRunning && stopWatch.Elapsed.Seconds == 10) //first task
+                {
+                    MyMethod(this).ContinueWith((Task t) =>
+                    {
+                        stopWatch.Restart();
+                        return true;
+                    });
+                }
+
+                //  Always return true as to keep our device timer running, false if we want to cancel the timer.
+                return true;
+            });
+
+        }
+
+        protected async Task<string> MyMethod(MainWindow mainWindow)
+        {
+            conn = DependencyService.Get<ISQLite>().GetConnection();
+            
+            
+            List<EventPhoto> query = conn.Query<EventPhoto>("Select * From EventPhoto where EventPhotoId =0  ORDER BY ROWID ASC LIMIT 1");
+
+            if (query.Count > 0)
+            {
+                EventPhoto EP = query[0];
+
+                conn = DependencyService.Get<ISQLite>().GetConnection();
+                conn.CreateTable<EventUser>();
+
+                EventUser a = conn.Table<EventUser>().Where(k => k.EventId == EP.EventId).ToList()[0];
+
+                var x12356 = await SendRequestAsync_jw(EP, a);
+            }
+            return null;
+
 
 
         }
@@ -143,8 +183,6 @@ namespace Memobook.Views
 
         private void ResetDatabase_Clicked(object sender, EventArgs e)
         {
-
-
             conn = DependencyService.Get<ISQLite>().GetConnection();
             conn.DeleteAll<EventUser>();
             conn.DeleteAll<EventPhoto>();
@@ -166,26 +204,38 @@ namespace Memobook.Views
         }
 
 
-
-
         private void QR2Button_Clicked(object sender, EventArgs e)
         {
-
-
-
             ShowModalPage();
-            //  DisplayAlert("Zeskanowany QR", qrcode, "OK");
-
         }
 
-
+        public bool IsPlaying { get; set; }
         private async void ShowModalPage()
         {
             // When you want to show the modal page, just call this method
             // add the event handler for to listen for the modal popping event:
-            Memobook.App.Current.ModalPopping += HandleModalPopping;
+           
             _myModalPage = new BarcodeScanner();
-            await Navigation.PushModalAsync(_myModalPage);
+            await Navigation.PushAsync(_myModalPage);
+
+
+            _myModalPage.Disappearing += (sender2, e2) =>
+            {
+                Qrcode = _myModalPage.qrcode;
+                Komunikat = _myModalPage.komunikat;
+                x1234 = _myModalPage.x123;
+                _myModalPage = null;
+
+                if (Qrcode != null && Komunikat!= "jesteś już członkiem tego wydarzenia") events2.Add(x1234);
+
+                if (Qrcode != null)
+                {
+                    Device.BeginInvokeOnMainThread(async () =>
+                    {
+                        await DisplayAlert("Uwaga", Komunikat, "OK");
+                    });
+                }
+            };
         }
         private string qrcode;
         public string Qrcode
@@ -224,30 +274,6 @@ namespace Memobook.Views
         }
         public EventUser x1234;
 
-        private void HandleModalPopping(object sender, ModalPoppingEventArgs e)
-        {
-            if (e.Modal == _myModalPage)
-            {
-                // now we can retrieve that phone number:
-                Qrcode = _myModalPage.qrcode;
-                Komunikat = _myModalPage.komunikat;
-                x1234 = _myModalPage.x123;
-                _myModalPage = null;
-
-                events2.Add(x1234);
-
-                // remember to remove the event handler:
-                //  Memobook.App.Current.ModalPopping -= HandleModalPopping;
-
-                Device.BeginInvokeOnMainThread(async () =>
-                {
-                    await DisplayAlert("Uwaga", Komunikat, "OK");
-                });
-
-                // events2.Add(new Event() { Name = "Nowe dodane wydarzenie o nazwie...", EventId = "szczegóły wydarzenia" });
-            }
-        }
-
 
 
 
@@ -260,30 +286,13 @@ namespace Memobook.Views
         authorizeUrl: new Uri("https://login.microsoftonline.com/common/oauth2/V2.0/authorize"), // the auth URL for the service
         redirectUrl: new Uri("https://graph.microsoft.com/v1.0/me")); // the redirect URL for the service
 
-
-
             authenticator.Completed += OnAuthCompleted;
             authenticator.Error += OnAuthError;
-
-            // AuthenticationState.Authenticator = authenticator;
-
             var presenter = new Xamarin.Auth.Presenters.OAuthLoginPresenter();
             presenter.Login(authenticator);
-
-
-            //GeoNamesWebService geoService = new GeoNamesWebService();
-            //var x = await geoService.LoginAsync();
-            //var x1 = 1;
-
-
-
-
-            //var stream = DependencyService.Get<IBarcodeService>().ConvertImageStream("Janek");
-            //barcode.Source= ImageSource.FromStream(() => { return stream; });
-
         }
 
-        public async void lvItemTapped(object sender, ItemTappedEventArgs e)
+        public void lvItemTapped(object sender, ItemTappedEventArgs e)
         {
 
             var myListView = (ListView)sender;
@@ -329,7 +338,7 @@ namespace Memobook.Views
                 userName = jObjectResponse["userPrincipalName"].Value<string>();
 
 
-                using (var client1 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                using (var client1 = new HttpClient())
                 {
 
            
@@ -374,7 +383,7 @@ namespace Memobook.Views
 
 
 
-                        using (var client = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                        using (var client = new HttpClient())
                         {
 
                             //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Email/");
@@ -406,7 +415,7 @@ namespace Memobook.Views
                                 //pobranie nowych danych do bazy po przelogowaniu
 
 
-                                using (var client12 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                                using (var client12 = new HttpClient())
                                 {
 
                                     //client12.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/GetAllMyEvents/");
@@ -484,6 +493,7 @@ namespace Memobook.Views
 
             var action = await DisplayActionSheet("Dodaj zdjęcie do wydarzenia", "Anuluj", null, "Wybierz istniejące", "Zrób zdjęcie");
             MediaFile file = null;
+            List<MediaFile> files = new List<MediaFile>();
             if (action == "Zrób zdjęcie")
             {
 
@@ -504,55 +514,60 @@ namespace Memobook.Views
                 if (!CrossMedia.Current.IsPickPhotoSupported)
                 {
                     await DisplayAlert("Photos Not Supported", "Permission not granted to photos", "OK");
- 
+
                     return;
                 }
-                file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new
+                files = await Plugin.Media.CrossMedia.Current.PickPhotosAsync(new
                                   Plugin.Media.Abstractions.PickMediaOptions
                 {
                     PhotoSize = Plugin.Media.Abstractions.PhotoSize.Full
                 });
             }
 
+            if (files.Count == 0 && file != null)
+            {
+                files.Add(file);
+            }
+
+            if (files.Count == 0)
+            { 
             if (file == null)
-                    return;
-
-                //   await DisplayAlert("File Location", file.Path, "OK");
-                byte[] aaaa;
-                Stream aaaaaaaa;
-
-                using (var memoryStream = new MemoryStream())
+                return;
+            }
+            if (files.Count > 0)
+            {
+                foreach (MediaFile mf in files)
                 {
+                    byte[] aaaa;
+                    Stream aaaaaaaa;
 
-                    file.GetStream().CopyTo(memoryStream);
-                    file.Dispose();
-                    aaaaaaaa = memoryStream;
-                    aaaa = memoryStream.ToArray();
+                    using (var memoryStream = new MemoryStream())
+                    {
+
+                        mf.GetStream().CopyTo(memoryStream);
+                        mf.Dispose();
+                        aaaaaaaa = memoryStream;
+                        aaaa = memoryStream.ToArray();
+                    }
+
+
+                    EventUser stringInThisCell = (EventUser)((Button)sender).BindingContext;
+
+                    conn = DependencyService.Get<ISQLite>().GetConnection();
+                    conn.CreateTable<EventPhoto>();
+
+                    EventPhoto x = new EventPhoto();
+                    x.PhotoOriginal = aaaa;
+                    var balbal= DependencyService.Get<IMediaService>().ResizeImage(aaaa, 200, 200);
+                    x.Photo = balbal;
+                    x.DateAdded = DateTime.Now;
+                    x.EventUserId = stringInThisCell.EventUserID;
+                    x.EventId = stringInThisCell.EventId;
+                    x.EventPhotoId = 0;
+                    conn.Insert(x);
+
                 }
-
-
-                EventUser stringInThisCell = (EventUser)((Button)sender).BindingContext;
-
-                conn = DependencyService.Get<ISQLite>().GetConnection();
-                conn.CreateTable<EventPhoto>();
-                EventPhoto x = new EventPhoto();
-                x.PhotoOriginal = aaaa;
-                x.DateAdded = DateTime.Now;
-                x.EventUserId = stringInThisCell.EventUserID;
-                x.EventId = stringInThisCell.EventId;
-
-                conn = DependencyService.Get<ISQLite>().GetConnection();
-                conn.CreateTable<EventUser>();
-                EventUser a = conn.Table<EventUser>().Where(k => k.EventId == stringInThisCell.EventId).ToList()[0];
-
-
-                  var x12356 = await SendRequestAsync_jw(x,a);
-
-                //conn.Query<EventUser>("select * from EventUser",null);
-
-                //conn.Query<EventUser>("select * from EventUser",null);
-
-                conn.Insert(x);
+            }
         }
 
 
@@ -560,9 +575,9 @@ namespace Memobook.Views
         {
 
 
-            using (var client12 = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+            using (var client12 = new HttpClient())
             {
-
+                client12.Timeout = TimeSpan.FromSeconds(200);
 
                 // Set the Accept header for BSON.
                 client12.DefaultRequestHeaders.Accept.Clear();
@@ -579,10 +594,10 @@ namespace Memobook.Views
                 // POST using the BSON formatter.
                 //MediaTypeFormatter bsonFormatter = new BsonMediaTypeFormatter();
                 var result = await client12.PostAsync("aaa", content);
-                string resultContent = await result.Content.ReadAsStringAsync();
+             
                 if (result.IsSuccessStatusCode)
                 {
-
+                    string resultContent = await result.Content.ReadAsStringAsync();
                     conn = DependencyService.Get<ISQLite>().GetConnection();
                     conn.CreateTable<EventPhoto>();
                     x12345.EventPhotoId = Convert.ToInt32(resultContent);
@@ -616,7 +631,39 @@ namespace Memobook.Views
 
         }
 
-            static public class RequestHelper
+
+        public class ImageHelper
+        {
+            public static byte[] Resize2Max50Kbytes(byte[] byteImageIn)
+            {
+                byte[] currentByteImageArray = byteImageIn;
+                double scale = 1f;
+
+
+                MemoryStream inputMemoryStream = new MemoryStream(byteImageIn);
+                System.Drawing.Image fullsizeImage = System.Drawing.Image.FromStream(inputMemoryStream);
+
+                while (currentByteImageArray.Length > 50000)
+                {
+
+
+                    Bitmap fullSizeBitmap = new Bitmap(fullsizeImage, new System.Drawing.Size((int)(fullsizeImage.Width * scale),
+                                                                                              (int)(fullsizeImage.Height * scale)));
+                    MemoryStream resultStream = new MemoryStream();
+
+                    fullSizeBitmap.Save(resultStream, fullsizeImage.RawFormat);
+
+                    currentByteImageArray = resultStream.ToArray();
+                    resultStream.Dispose();
+                    resultStream.Close();
+
+                    scale -= 0.05f;
+                }
+
+                return currentByteImageArray;
+            }
+        }
+        static public class RequestHelper
             {
                 #region POST
                 static public async Task<string> PostRequestStringAsync(string url, string urlParams, string contentType, HttpClient httpClient)
@@ -661,7 +708,7 @@ namespace Memobook.Views
 
         
         public string ChosenEvent { get; set; }
-        private async void Button_Clicked_2(object sender, EventArgs e)
+        private void Button_Clicked_2(object sender, EventArgs e)
         {
             EventUser stringInThisCell = (EventUser)((Button)sender).BindingContext;
 
@@ -676,9 +723,11 @@ namespace Memobook.Views
         {
             // When you want to show the modal page, just call this method
             // add the event handler for to listen for the modal popping event:
-            Memobook.App.Current.ModalPopping += HandleModalPopping;
+           
             _myModalPag2e = new EventInfo(ChosenEvent);
-            await Navigation.PushModalAsync(_myModalPag2e);
+            await Navigation.PushAsync(_myModalPag2e);
+
+          
         }
     }
 }

@@ -4,7 +4,8 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="Memobook.Views.MainWindow">
+             x:Class="Memobook.Views.MainWindow"
+             Title="Memobook">
     <ContentPage.Content>
 
         <Grid>
@@ -70,6 +71,7 @@
                 <Button x:Name="ButtonLogout"   Text="&#xf14d;"  FontFamily="{StaticResource FontAwesomeSolid}"   Grid.Row="0"  IsVisible="False" WidthRequest="120" HeightRequest="60" HorizontalOptions="End"  Grid.Column="2"/>
                 <!--<Image Grid.ColumnSpan="2" x:Name="barcode" HorizontalOptions="Center"/>-->
                 <Button x:Name="DodajWydarzenie" IsVisible="False" Grid.Row="2" Text="(+) Dodaj Wydarzenie"  FontSize="Micro"  WidthRequest="120" HeightRequest="40" HorizontalOptions="End"  Grid.Column="2"/>
+                
             </Grid>
             <Grid Grid.Row="1" BackgroundColor="White">
                 <Grid.RowDefinitions>
@@ -83,7 +85,7 @@
                 <Label x:Name="j" Text="Wydarzenia w których jesteś zaproszony:" Grid.Column="0"  Margin="10" IsVisible="True"
                                FontAttributes="Bold" />
                 <Button x:Name="QR2Button" Grid.Row="0" FontSize="Medium" Grid.Column="1" HorizontalOptions="EndAndExpand" WidthRequest="100"   Text="&#xf055;"  FontFamily="{StaticResource FontAwesomeSolid}" Margin="0,0,5,0"/>
-                <Button x:Name="ResetDatabase" IsVisible="false" Grid.Row="0" FontSize="Micro" Grid.Column="0" HorizontalOptions="EndAndExpand" WidthRequest="50"   Text="R" Margin="0,0,5,0"/>
+                <Button x:Name="ResetDatabase" IsVisible="True" Grid.Row="0" FontSize="Micro" Grid.Column="0" HorizontalOptions="EndAndExpand" WidthRequest="50"   Text="R" Margin="0,0,5,0"/>
                 <ListView x:Name="SupplyLevels2" ItemsSource="{Binding events2}" Grid.Row="1" Grid.ColumnSpan="2"
               CachingStrategy="RecycleElement"
               RowHeight="60">

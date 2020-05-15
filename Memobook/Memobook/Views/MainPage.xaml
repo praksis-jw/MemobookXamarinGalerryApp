@@ -20,7 +20,7 @@
             </NavigationPage.Icon>
             <x:Arguments>
                 <views:MainWindow />
-                
+
             </x:Arguments>
         </NavigationPage>
     </MasterDetailPage.Detail>

@@ -34,51 +34,63 @@ namespace Memobook
 
         private async void Button_Clicked_2(object sender, EventArgs e)
         {
-            await Navigation.PushModalAsync(new QrCodeShow(qrcode));
+            await Navigation.PushAsync(new QrCodeShow(qrcode));
         }
 
-    
 
-    protected override void OnAppearing()
+        
+
+        protected override void OnAppearing()
         {
             base.OnAppearing();
-   
 
+           
             conn = DependencyService.Get<ISQLite>().GetConnection();
-
-            //PhotosList = new ObservableCollection<EventPhoto>(conn.Table<EventPhoto>().ToList());
             EventUser a = conn.Table<EventUser>().Where(k => k.EventId == EventId).ToList()[0];
             lNazwaWyd.Text = a.Name;
             lDataStartu.Text = a.StartDate;
             lDataKonca.Text = a.EndDate;
             qrcode = a.qrcode;
 
-            
 
+            var stream = DependencyService.Get<IBarcodeService>().ConvertImageStream(qrcode,300,300);
+            QrButton.Source = ImageSource.FromStream(() => { return stream; });
+            conn.CreateTable<EventPhoto>();
 
             List<EventPhoto> query = conn.Query<EventPhoto>("Select * From EventPhoto where EventId = '" + EventId + "'"
                              );
-            List<EventPhoto> query2 = conn.Query<EventPhoto>("Select * From EventPhoto"
-                            );
-
-            // Create cols for each img
-            //for (int col = 0; col < query.Count; ++col)
-            //{
-            //    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            //}
-            // Populate grid
 
             for (int col = 0; col < query.Count; ++col)
             {
 
-                if (query[col].PhotoOriginal is null)
+                if (query[col].EventPhotoId ==0)
                 {
-                    grid.Children.Add(new Image { Source = null }, 0, col);
+                    var child = new Image {Source = "Spinner.gif", IsAnimationPlaying = true, StyleId=query[col].PhotoId.ToString() };
+
+                    var tapGestureRecognizer = new TapGestureRecognizer();
+                    tapGestureRecognizer.Tapped += (s, e) => {
+                       
+                        Navigation.PushAsync(new PhotoShow(int.Parse(query[col].EventId)));
+
+                    };
+                    child.GestureRecognizers.Add(tapGestureRecognizer);
+                    grid.Children.Add(new Frame { CornerRadius = 0,  Padding = 0, Content= child } , col % 4, col / 4);
+                    // new Image { Source = "Spinner.gif", IsAnimationPlaying = true }
                 }
                 else
                 {
-                    var stream1 = new MemoryStream(query[col].PhotoOriginal);
-                    grid.Children.Add(new Image { Source = ImageSource.FromStream(() => stream1) }, col % 4, col / 4);
+                    var stream1 = new MemoryStream(query[col].Photo);
+                    var child = new Image {   Source = ImageSource.FromStream(() => stream1), StyleId = query[col].PhotoId.ToString() };
+
+                    var tapGestureRecognizer = new TapGestureRecognizer();
+                    tapGestureRecognizer.Tapped += (s, e) => {
+                        var a1 = s as Image;
+                        Navigation.PushAsync(new PhotoShow(int.Parse(a1.StyleId)));
+
+                    };
+                    child.GestureRecognizers.Add(tapGestureRecognizer);
+
+                    grid.Children.Add(new Frame { CornerRadius = 0, Padding = 0, Content = child }, col % 4, col / 4);
                 }
             }
         }

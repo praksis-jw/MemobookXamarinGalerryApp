@@ -1,16 +1,15 @@
 ﻿using System;
-
 using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Android.OS;
 using Memobook.Models;
 using Android.Content;
 using Microsoft.Identity.Client;
-using Memobook.Data;
 using System.Net;
+using Plugin.Permissions;
+using Plugin.CurrentActivity;
+
 
 namespace Memobook.Droid
 {
@@ -53,8 +52,6 @@ namespace Memobook.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
 
-
-
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
@@ -64,7 +61,8 @@ namespace Memobook.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             System.Net.ServicePointManager.ServerCertificateValidationCallback = (_, __, ___, ____) => true;
             LoadApplication(new App());
-            Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
+            CrossCurrentActivity.Current.Init(this, savedInstanceState);
+            //Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             global::Xamarin.Auth.Presenters.XamarinAndroid.AuthenticationConfiguration.Init(this, savedInstanceState);
             global::Xamarin.Auth.CustomTabsConfiguration.CustomTabsClosingMessage = null;
             //MicrosoftAuthService.ParentWindow = this;
@@ -81,10 +79,12 @@ namespace Memobook.Droid
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             global::ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-           
+
+       
+
         }
     }
      

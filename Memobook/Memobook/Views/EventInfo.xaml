@@ -4,6 +4,7 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:flv="clr-namespace:DLToolkit.Forms.Controls;assembly=DLToolkit.Forms.Controls.FlowListView"
              mc:Ignorable="d"
+             Title="Szczegóły wydarzenia"
              x:Class="Memobook.EventInfo">
     <ContentPage.Content>
         <Grid Margin="10,10,10,10">
@@ -11,17 +12,16 @@
                 <RowDefinition Height="1*">
                 
                 </RowDefinition>
-                <RowDefinition Height="4*">
+                <RowDefinition Height="3*">
 
                 </RowDefinition>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="7*"></ColumnDefinition>
-                    <ColumnDefinition Width="2*"></ColumnDefinition>
+                    <ColumnDefinition Width="3*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
@@ -32,41 +32,45 @@
                     <Label Margin="5,0,0,0" x:Name="lDataStartu" Text=""></Label>
                     <Label FontAttributes="Bold"  Text="DataKońca:"></Label>
                     <Label Margin="5,0,0,0" x:Name="lDataKonca" Text=""></Label>
+                  
                 </StackLayout>
-                <Button Clicked="Button_Clicked_2" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2"  Text="KOD    QR" ></Button>
-
+                <Grid Grid.Column="1" Grid.RowSpan="2">
+                    <ImageButton Clicked="Button_Clicked_2" x:Name="QrButton"  HorizontalOptions="StartAndExpand" VerticalOptions="CenterAndExpand"></ImageButton>
+                </Grid>
             </Grid>
-
-            <ScrollView HorizontalOptions="FillAndExpand"    Grid.Row="1">
-        
-                <Grid x:Name="grid"  HorizontalOptions="Start">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="100"></RowDefinition>
-                    </Grid.RowDefinitions>
-          
-        </Grid>
-            </ScrollView>
-         
+                    <RowDefinition Height="1*">
+
+                    </RowDefinition>
+                    <RowDefinition Height="12*">
+
+                    </RowDefinition>
+                </Grid.RowDefinitions>
+                <Label FontAttributes="Bold"  Text="Zdjęcia:" Grid.Row="0"></Label>
+                <ScrollView HorizontalOptions="FillAndExpand"  Grid.Row="1" Margin="10,0,0,0">
+
+                    <Grid x:Name="grid"  HorizontalOptions="Start">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                    </Grid>
+                </ScrollView>
+            </Grid>
         </Grid>
     </ContentPage.Content>
 </ContentPage>

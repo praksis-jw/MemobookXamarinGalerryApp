@@ -32,7 +32,7 @@ namespace Memobook.Views
      
         }
 
-        private bool _isScanning = true;
+        private bool _isScanning { get; set; }
 
         public async void Handle_OnScanResult(Result result)
         {
@@ -62,7 +62,7 @@ namespace Memobook.Views
                 if (query.Count > 0)
                 {
                     komunikat = "jesteś już członkiem tego wydarzenia";
-                    await Navigation.PopModalAsync();
+                    Device.BeginInvokeOnMainThread(async () => await Navigation.PopAsync());
 
                 }
                 else
@@ -70,7 +70,7 @@ namespace Memobook.Views
                     komunikat = "zostałeś dodany do wydarzenia";
 
 
-                    using (var client = new HttpClient(DependencyService.Get<IHTTPClientHandlerCreationService>().GetInsecureHandler()))
+                    using (var client = new HttpClient())
                 {
 
                      //client.BaseAddress = new Uri("https://pph-ws.azurewebsites.net/Event/AddUserToEvent/");
@@ -100,7 +100,7 @@ namespace Memobook.Views
                             conn.CreateTable<EventUser>();
                             conn.Insert(dodanyevent);
                             x123 = dodanyevent;
-                            await Navigation.PopModalAsync();
+                            Device.BeginInvokeOnMainThread(async () => await Navigation.PopAsync());
                         }
                     }
                     }
